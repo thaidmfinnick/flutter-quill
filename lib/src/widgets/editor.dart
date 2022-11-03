@@ -1316,6 +1316,12 @@ class RenderEditor extends RenderEditableContainerBox
     );
   }
 
+  Offset getOffsetForPosition(TextPosition textPosition) {
+    final caretOffset = _getOffsetForCaret(textPosition);
+
+    return localToGlobal(caretOffset + _paintOffset);
+  }
+
   /// Returns the y-offset of the editor at which [selection] is visible.
   ///
   /// The offset is the distance from the top of the editor and is the minimum

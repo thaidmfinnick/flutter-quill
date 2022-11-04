@@ -146,7 +146,9 @@ mixin RawEditorStateSelectionDelegateMixin on EditorState
   @override
   void userUpdateTextEditingValue(
       TextEditingValue value, SelectionChangedCause cause) {
-        if(textEditingValue.text == '\n') return;
+        if(textEditingValue.text == value.text &&
+          value.selection.baseOffset != textEditingValue.selection.baseOffset
+        ) return;
     textEditingValue = value;
   }
 

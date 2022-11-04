@@ -147,6 +147,7 @@ mixin RawEditorStateSelectionDelegateMixin on EditorState
   void userUpdateTextEditingValue(
       TextEditingValue value, SelectionChangedCause cause) {
         if(textEditingValue.text == value.text &&
+          textEditingValue.text == '\n' &&
           value.selection.baseOffset != textEditingValue.selection.baseOffset
         ) return;
     textEditingValue = value;

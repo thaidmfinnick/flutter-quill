@@ -145,13 +145,15 @@ class AutoExitBlockRule extends InsertRule {
   const AutoExitBlockRule();
 
   bool _isEmptyLine(Operation? before, Operation? after) {
-    if (before == null) {
-      return true;
-    }
-    return before.data is String &&
-        (before.data as String).endsWith('\n') &&
-        after!.data is String &&
-        (after.data as String).startsWith('\n');
+    // check neu dong rong hoac null thi xuong nhung khong can
+    return false;
+    // if (before == null) {
+    //   return true;
+    // }
+    // return before.data is String &&
+    //     (before.data as String).endsWith('\n') &&
+    //     after!.data is String &&
+    //     (after.data as String).startsWith('\n');
   }
 
   @override

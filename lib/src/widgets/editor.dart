@@ -144,43 +144,48 @@ abstract class RenderAbstractEditor implements TextLayoutMetrics {
 }
 
 class QuillEditor extends StatefulWidget {
-  const QuillEditor(
-      {required this.controller,
-      required this.focusNode,
-      required this.scrollController,
-      required this.scrollable,
-      required this.padding,
-      required this.autoFocus,
-      required this.readOnly,
-      required this.expands,
-      this.showCursor,
-      this.paintCursorAboveText,
-      this.placeholder,
-      this.enableInteractiveSelection = true,
-      this.enableSelectionToolbar = true,
-      this.scrollBottomInset = 0,
-      this.minHeight,
-      this.maxHeight,
-      this.maxContentWidth,
-      this.customStyles,
-      this.textCapitalization = TextCapitalization.sentences,
-      this.keyboardAppearance = Brightness.light,
-      this.scrollPhysics,
-      this.onLaunchUrl,
-      this.onTapDown,
-      this.onTapUp,
-      this.onSingleLongTapStart,
-      this.onSingleLongTapMoveUpdate,
-      this.onSingleLongTapEnd,
-      this.embedBuilders,
-      this.linkActionPickerDelegate = defaultLinkActionPickerDelegate,
-      this.customStyleBuilder,
-      this.locale,
-      this.floatingCursorDisabled = false,
-      this.textSelectionControls,
-      this.onImagePaste,
-      Key? key})
-      : super(key: key);
+  const QuillEditor({
+    required this.controller,
+    required this.focusNode,
+    required this.scrollController,
+    required this.scrollable,
+    required this.padding,
+    required this.autoFocus,
+    required this.readOnly,
+    required this.expands,
+    this.showCursor,
+    this.paintCursorAboveText,
+    this.placeholder,
+    this.enableInteractiveSelection = true,
+    this.enableSelectionToolbar = true,
+    this.scrollBottomInset = 0,
+    this.minHeight,
+    this.maxHeight,
+    this.maxContentWidth,
+    this.customStyles,
+    this.textCapitalization = TextCapitalization.sentences,
+    this.keyboardAppearance = Brightness.light,
+    this.scrollPhysics,
+    this.onLaunchUrl,
+    this.onTapDown,
+    this.onTapUp,
+    this.onSingleLongTapStart,
+    this.onSingleLongTapMoveUpdate,
+    this.onSingleLongTapEnd,
+    this.embedBuilders,
+    this.linkActionPickerDelegate = defaultLinkActionPickerDelegate,
+    this.customStyleBuilder,
+    this.locale,
+    this.floatingCursorDisabled = false,
+    this.textSelectionControls,
+    this.onImagePaste,
+    this.cursorWidth = 1.0,
+    this.cursorHeight = 15,
+    this.cursorRadius,
+    this.cursorColor,
+    Key? key
+
+  }) : super(key: key);
 
   factory QuillEditor.basic({
     required QuillController controller,
@@ -392,6 +397,14 @@ class QuillEditor extends StatefulWidget {
   /// Returns the url of the image if the image should be inserted.
   final Future<String?> Function(Uint8List imageBytes)? onImagePaste;
 
+  final double cursorWidth;
+
+  final double cursorHeight;
+
+  final Radius? cursorRadius;
+
+  final Color? cursorColor;
+
   @override
   QuillEditorState createState() => QuillEditorState();
 }
@@ -465,10 +478,11 @@ class QuillEditorState extends State<QuillEditor>
       showSelectionHandles: isMobile(theme.platform),
       showCursor: widget.showCursor,
       cursorStyle: CursorStyle(
-        color: cursorColor,
+        color: widget.cursorColor ?? cursorColor,
         backgroundColor: Colors.grey,
-        width: 2,
-        radius: cursorRadius,
+        width: widget.cursorWidth,
+        height: widget.cursorHeight,
+        radius: widget.cursorRadius ?? cursorRadius,
         offset: cursorOffset,
         paintAboveText: widget.paintCursorAboveText ?? paintCursorAboveText,
         opacityAnimates: cursorOpacityAnimates,

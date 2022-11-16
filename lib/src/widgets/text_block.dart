@@ -126,7 +126,8 @@ class EditableTextBlock extends StatelessWidget {
       index++;
       final editableTextLine = EditableTextLine(
           line,
-          _buildLeading(context, line, index, indentLevelCounts, count),
+          // _buildLeading(context, line, index, indentLevelCounts, count),
+          Container(),
           TextLine(
             line: line,
             textDirection: textDirection,

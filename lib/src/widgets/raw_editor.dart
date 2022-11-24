@@ -1,3 +1,5 @@
+// ignore_for_file: lines_longer_than_80_chars
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
@@ -1247,6 +1249,13 @@ class RawEditorState extends EditorState
       false,
       _characterBoundary,
     )),
+    // Extend/Move Selection
+    ExpandSelectionToLineBreakIntent: _makeOverridable(
+        CallbackAction<ExpandSelectionToLineBreakIntent>(onInvoke: _expandSelectionToLinebreak)),
+    ExpandSelectionToDocumentBoundaryIntent: _makeOverridable(
+        CallbackAction<ExpandSelectionToDocumentBoundaryIntent>(onInvoke: _expandSelectionToDocumentBoundary)),
+    ScrollToDocumentBoundaryIntent: _makeOverridable(
+        CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
     ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(
         _UpdateTextSelectionAction<ExtendSelectionToNextWordBoundaryIntent>(
             this, true, _nextWordBoundary)),
@@ -1284,6 +1293,49 @@ class RawEditorState extends EditorState
   void insertTextPlaceholder(Size size) {
     // this is needed for Scribble (Stylus input) in Apple platforms
     // and this package does not implement this feature
+  }
+
+  void _expandSelectionToLinebreak(ExpandSelectionToLineBreakIntent intent) {
+    final textBoundary = _linebreak(intent);
+    _expandSelection(intent.forward, textBoundary);
+  }
+
+  void _expandSelection(bool forward, _TextBoundary textBoundary,
+    [bool extentAtIndex = false]) {
+    final textBoundarySelection = textBoundary.textEditingValue.selection;
+    if (!textBoundarySelection.isValid) {
+      return;
+    }
+
+    final inOrder = textBoundarySelection.baseOffset <= textBoundarySelection.extentOffset;
+    final towardsExtent = forward == inOrder;
+    final position = towardsExtent
+        ? textBoundarySelection.extent
+        : textBoundarySelection.base;
+
+    final newExtent = forward
+      ? textBoundary.getTrailingTextBoundaryAt(position)
+      : textBoundary.getLeadingTextBoundaryAt(position);
+
+    final newSelection = textBoundarySelection.expandTo(newExtent, textBoundarySelection.isCollapsed || extentAtIndex);
+    userUpdateTextEditingValue(
+      textEditingValue.copyWith(selection: newSelection),
+      SelectionChangedCause.keyboard,
+    );
+    bringIntoView(newSelection.extent);
+  }
+
+  void _expandSelectionToDocumentBoundary(ExpandSelectionToDocumentBoundaryIntent intent) {
+    final textBoundary = _documentBoundary(intent);
+    _expandSelection(intent.forward, textBoundary, true);
+  }
+
+  void _scrollToDocumentBoundary(ScrollToDocumentBoundaryIntent intent) {
+    if (intent.forward) {
+      bringIntoView(TextPosition(offset: textEditingValue.text.length));
+    } else {
+      bringIntoView(const TextPosition(offset: 0));
+    }
   }
 
   @override

@@ -1,3 +1,93 @@
+# [7.0.3]
+* Fix ordered list numeration for lists with more than one level of list.
+
+# [7.0.2]
+* Allow widgets to override widget span properties.
+
+# [7.0.1]
+* Update i18n_extension dependency to version 8.0.0.
+
+# [7.0.0]
+* Breaking change: Tuples are no longer used. They have been replaced with a number of data classes.
+
+# [6.4.4]
+* Increased compatibility with Flutter widget tests.
+
+# [6.4.3]
+* Update dependencies (collection: 1.17.0, flutter_keyboard_visibility: 5.4.0, quiver: 3.2.1, tuple: 2.0.1, url_launcher: 6.1.9, characters: 1.2.1, i18n_extension: 7.0.0, device_info_plus: 8.1.0)
+
+# [6.4.2]
+* Replace `buildToolbar` with `contextMenuBuilder`.
+
+# [6.4.1]
+* Control the detect word boundary behaviour.
+
+# [6.4.0]
+* Use `axis` to make the toolbar vertical.
+* Use `toolbarIconCrossAlignment` to align the toolbar icons on the cross axis.
+* Breaking change: `QuillToolbar`'s parameter `toolbarHeight` was renamed to `toolbarSize`.
+
+# [6.3.5]
+* Ability to add custom shortcuts.
+
+# [6.3.4]
+* Update clipboard status prior to showing selected text overlay.
+
+# [6.3.3]
+* Fixed handling of mac intents.
+
+# [6.3.2]
+* Added `unknownEmbedBuilder` to QuillEditor.
+* Fix error style when input chinese japanese or korean.
+
+# [6.3.1]
+* Add color property to the basic factory function.
+
+# [6.3.0]
+* Support Flutter 3.7.
+
+# [6.2.2]
+* Fix: nextLine getter null where no assertion.
+
+# [6.2.1]
+* Revert "Align numerical and bullet lists along with text content".
+
+# [6.2.0]
+* Align numerical and bullet lists along with text content.
+
+# [6.1.12]
+* Apply i18n for default font dropdown option labels corresponding to 'Clear'.
+
+# [6.1.11]
+* Remove iOS hack for delaying focus calculation.
+
+# [6.1.10]
+* Delay focus calculation for iOS.
+
+# [6.1.9]
+* Bump keyboard show up wait to 1 sec.
+
+# [6.1.8]
+* Recalculate focus when showing keyboard.
+
+# [6.1.7]
+* Add czech localizations.
+
+# [6.1.6]
+* Upgrade i18n_extension to 6.0.0.
+
+# [6.1.5]
+* Fix formatting exception.
+
+# [6.1.4]
+* Add double quotes validation.
+
+# [6.1.3]
+* Revert "fix order list numbering (#988)".
+
+# [6.1.2]
+* Add typing shortcuts.
+
 # [6.1.1]
 * Fix order list numbering.
 

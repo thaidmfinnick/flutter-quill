@@ -1445,8 +1445,6 @@ class RawEditorState extends EditorState
     PasteTextIntent: _makeOverridable(CallbackAction<PasteTextIntent>(
         onInvoke: (intent) => pasteText(intent.cause))),
 
-    HideSelectionToolbarIntent:
-        _makeOverridable(_HideSelectionToolbarAction(this)),
     UndoTextIntent: _makeOverridable(_UndoKeyboardAction(this)),
     RedoTextIntent: _makeOverridable(_RedoKeyboardAction(this)),
 
@@ -2215,25 +2213,6 @@ class _CopySelectionAction extends ContextAction<CopySelectionTextIntent> {
       !state.textEditingValue.selection.isCollapsed;
 }
 
-//Intent class for "escape" key to dismiss selection toolbar in Windows platform
-class HideSelectionToolbarIntent extends Intent {
-  const HideSelectionToolbarIntent();
-}
-
-class _HideSelectionToolbarAction
-    extends ContextAction<HideSelectionToolbarIntent> {
-  _HideSelectionToolbarAction(this.state);
-
-  final RawEditorState state;
-
-  @override
-  void invoke(HideSelectionToolbarIntent intent, [BuildContext? context]) {
-    state.hideToolbar();
-  }
-
-  @override
-  bool get isActionEnabled => state.textEditingValue.selection.isValid;
-}
 
 class _UndoKeyboardAction extends ContextAction<UndoTextIntent> {
   _UndoKeyboardAction(this.state);

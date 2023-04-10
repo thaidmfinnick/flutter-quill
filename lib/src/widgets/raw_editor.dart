@@ -497,16 +497,16 @@ class RawEditorState extends EditorState
       return KeyEventResult.ignored;
     }
 
-    // Handle indenting blocks when pressing the tab key.
-    if (event.logicalKey == LogicalKeyboardKey.tab) {
-      return _handleTabKey(event);
-    }
+    // // Handle indenting blocks when pressing the tab key.
+    // if (event.logicalKey == LogicalKeyboardKey.tab) {
+    //   return _handleTabKey(event);
+    // }
 
-    // Handle inserting lists when space is pressed following
-    // a list initiating phrase.
-    if (event.logicalKey == LogicalKeyboardKey.space) {
-      return _handleSpaceKey(event);
-    }
+    // // Handle inserting lists when space is pressed following
+    // // a list initiating phrase.
+    // if (event.logicalKey == LogicalKeyboardKey.space) {
+    //   return _handleSpaceKey(event);
+    // }
 
     return KeyEventResult.ignored;
   }

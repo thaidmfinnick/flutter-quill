@@ -164,7 +164,7 @@ class EditorTextSelectionGestureDetectorBuilder {
       SelectionChangedCause.forcePress,
     );
     if (shouldShowSelectionToolbar) {
-      editor!.showToolbar();
+      if(isMobile()) editor!.showToolbar();
     }
   }
 
@@ -188,6 +188,8 @@ class EditorTextSelectionGestureDetectorBuilder {
   void onSecondarySingleTapUp(TapUpDetails details) {
     // added to show toolbar by right click
     if (shouldShowSelectionToolbar) {
+      renderEditor!.setLastTap(details.globalPosition);
+
       editor!.showToolbar();
     }
   }
@@ -254,7 +256,7 @@ class EditorTextSelectionGestureDetectorBuilder {
   @protected
   void onSingleLongTapEnd(LongPressEndDetails details) {
     if (shouldShowSelectionToolbar) {
-      editor!.showToolbar();
+      if(isMobile()) editor!.showToolbar();
     }
   }
 
@@ -279,7 +281,7 @@ class EditorTextSelectionGestureDetectorBuilder {
       // get added
       SchedulerBinding.instance.addPostFrameCallback((_) {
         if (shouldShowSelectionToolbar) {
-          editor!.showToolbar();
+          if(isMobile()) editor!.showToolbar();
         }
       });
     }
@@ -329,7 +331,7 @@ class EditorTextSelectionGestureDetectorBuilder {
         delegate.selectionEnabled &&
         shouldShowSelectionToolbar) {
       // added to show selection copy/paste toolbar after drag to select
-      editor!.showToolbar();
+     if(isMobile()) editor!.showToolbar();
     }
   }
 

@@ -478,8 +478,7 @@ class QuillEditorState extends State<QuillEditor>
       readOnly: widget.readOnly,
       placeholder: widget.placeholder,
       onLaunchUrl: widget.onLaunchUrl,
-      contextMenuBuilder:
-          showSelectionToolbar ? RawEditor.defaultContextMenuBuilder : null,
+      contextMenuBuilder: RawEditor.defaultContextMenuBuilder,
       showSelectionHandles: isMobile(theme.platform),
       showCursor: widget.showCursor,
       cursorStyle: CursorStyle(
@@ -1038,7 +1037,11 @@ class RenderEditor extends RenderEditableContainerBox
 
   @override
   void handleTapDown(TapDownDetails details) {
-    _lastTapDownPosition = details.globalPosition;
+    setLastTap(details.globalPosition);
+  }
+
+  void setLastTap(Offset offset) {
+    _lastTapDownPosition = offset;
   }
 
   bool _isDragging = false;

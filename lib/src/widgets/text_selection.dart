@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../../extensions.dart';
 import '../models/documents/nodes/node.dart';
 import 'editor.dart';
 
@@ -235,10 +236,14 @@ class EditorTextSelectionOverlay {
 
   Widget _buildHandle(
       BuildContext context, _TextSelectionHandlePosition position) {
-    if (_selection.isCollapsed &&
-        position == _TextSelectionHandlePosition.END) {
+    if (isMobile() && _selection.isCollapsed && position == _TextSelectionHandlePosition.END) {
       return Container();
     }
+
+    if (isDesktop() && _selection.baseOffset == _selection.extentOffset) {
+      return Container();
+    }
+
     return Visibility(
         visible: handlesVisible,
         child: _TextSelectionHandleOverlay(

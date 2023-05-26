@@ -1141,6 +1141,8 @@ class RawEditorState extends EditorState
       return false;
     }
 
+    widget.focusNode.requestFocus();
+
     // selectionOverlay is aggressively released when selection is collapsed
     // to remove unnecessary handles. Since a toolbar is requested here,
     // attempt to create the selectionOverlay if it's not already created.

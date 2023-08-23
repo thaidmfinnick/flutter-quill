@@ -39,7 +39,9 @@ class QuillController extends ChangeNotifier {
 
   /// Document managed by this controller.
   Document _document;
+
   Document get document => _document;
+
   set document(doc) {
     _document = doc;
 
@@ -101,6 +103,14 @@ class QuillController extends ChangeNotifier {
 
   // Increases or decreases the indent of the current selection by 1.
   void indentSelection(bool isIncrease) {
+    if (selection.isCollapsed) {
+      _indentSelectionFormat(isIncrease);
+    } else {
+      _indentSelectionEachLine(isIncrease);
+    }
+  }
+
+  void _indentSelectionFormat(bool isIncrease) {
     final indent = getSelectionStyle().attributes[Attribute.indent.key];
     if (indent == null) {
       if (isIncrease) {
@@ -119,11 +129,43 @@ class QuillController extends ChangeNotifier {
     formatSelection(Attribute.getIndentLevel(indent.value - 1));
   }
 
-  /// Returns all styles for each node within selection
-  List<OffsetValue<Style>> getAllIndividualSelectionStyles() {
-    final styles = document.collectAllIndividualStyles(
+  void _indentSelectionEachLine(bool isIncrease) {
+    final styles = document.collectAllStylesWithOffset(
+      selection.start,
+      selection.end - selection.start,
+    );
+    for (final style in styles) {
+      final indent = style.value.attributes[Attribute.indent.key];
+      final formatIndex = math.max(style.offset, selection.start);
+      final formatLength = math.min(
+            style.offset + (style.length ?? 0),
+            selection.end,
+          ) -
+          style.offset;
+      Attribute? formatAttribute;
+      if (indent == null) {
+        if (isIncrease) {
+          formatAttribute = Attribute.indentL1;
+        }
+      } else if (indent.value == 1 && !isIncrease) {
+        formatAttribute = Attribute.clone(Attribute.indentL1, null);
+      } else if (isIncrease) {
+        formatAttribute = Attribute.getIndentLevel(indent.value + 1);
+      } else {
+        formatAttribute = Attribute.getIndentLevel(indent.value - 1);
+      }
+      if (formatAttribute != null) {
+        document.format(formatIndex, formatLength, formatAttribute);
+      }
+    }
+    notifyListeners();
+  }
+
+  /// Returns all styles and Embed for each node within selection
+  List<OffsetValue> getAllIndividualSelectionStylesAndEmbed() {
+    final stylesAndEmbed = document.collectAllIndividualStyleAndEmbed(
         selection.start, selection.end - selection.start);
-    return styles;
+    return stylesAndEmbed;
   }
 
   /// Returns plain text for each node within selection
@@ -213,14 +255,6 @@ class QuillController extends ChangeNotifier {
           ..retain(data is String ? data.length : 1, toggledStyle.toJson());
         document.compose(retainDelta, ChangeSource.LOCAL);
       }
-    }
-
-    if (_keepStyleOnNewLine) {
-      final style = getSelectionStyle();
-      final notInlineStyle = style.attributes.values.where((s) => !s.isInline);
-      toggledStyle = style.removeAll(notInlineStyle.toSet());
-    } else {
-      toggledStyle = Style();
     }
 
     if (textSelection != null) {
@@ -360,7 +394,13 @@ class QuillController extends ChangeNotifier {
     _selection = selection.copyWith(
         baseOffset: math.min(selection.baseOffset, end),
         extentOffset: math.min(selection.extentOffset, end));
-    toggledStyle = Style();
+    if (_keepStyleOnNewLine) {
+      final style = getSelectionStyle();
+      final notInlineStyle = style.attributes.values.where((s) => !s.isInline);
+      toggledStyle = style.removeAll(notInlineStyle.toSet());
+    } else {
+      toggledStyle = Style();
+    }
     onSelectionChanged?.call(textSelection);
   }
 

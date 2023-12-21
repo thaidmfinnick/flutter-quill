@@ -1,16 +1,20 @@
+import 'package:meta/meta.dart' show immutable;
+
+import '../../../quill_delta.dart';
+import '../../extensions/uri_ext.dart';
 import '../../models/documents/document.dart';
 import '../documents/attribute.dart';
 import '../documents/nodes/embeddable.dart';
 import '../documents/style.dart';
-import '../quill_delta.dart';
 import 'rule.dart';
 
 /// A heuristic rule for insert operations.
+@immutable
 abstract class InsertRule extends Rule {
   const InsertRule();
 
   @override
-  RuleType get type => RuleType.INSERT;
+  RuleType get type => RuleType.insert;
 
   @override
   void validateArgs(int? len, Object? data, Attribute? attribute) {
@@ -23,12 +27,18 @@ abstract class InsertRule extends Rule {
 ///
 /// This rule ignores scenarios when the line is split on its edge, meaning
 /// a newline is inserted at the beginning or the end of a line.
+@immutable
 class PreserveLineStyleOnSplitRule extends InsertRule {
   const PreserveLineStyleOnSplitRule();
 
   @override
-  Delta? applyRule(Delta document, int index,
-      {int? len, Object? data, Attribute? attribute}) {
+  Delta? applyRule(
+    Delta document,
+    int index, {
+    int? len,
+    Object? data,
+    Attribute? attribute,
+  }) {
     if (data is! String || data != '\n') {
       return null;
     }
@@ -68,12 +78,18 @@ class PreserveLineStyleOnSplitRule extends InsertRule {
 ///   * pasting text containing multiple lines of text in a block
 ///
 /// This rule may also be activated for changes triggered by auto-correct.
+@immutable
 class PreserveBlockStyleOnInsertRule extends InsertRule {
   const PreserveBlockStyleOnInsertRule();
 
   @override
-  Delta? applyRule(Delta document, int index,
-      {int? len, Object? data, Attribute? attribute}) {
+  Delta? applyRule(
+    Delta document,
+    int index, {
+    int? len,
+    Object? data,
+    Attribute? attribute,
+  }) {
     if (data is! String || !data.contains('\n')) {
       // Only interested in text containing at least one newline character.
       return null;
@@ -139,6 +155,7 @@ class PreserveBlockStyleOnInsertRule extends InsertRule {
 /// This rule is only applied when the cursor is on the last line of a block.
 /// When the cursor is in the middle of a block we allow adding empty lines
 /// and preserving the block's style.
+@immutable
 class AutoExitBlockRule extends InsertRule {
   const AutoExitBlockRule();
 
@@ -155,8 +172,13 @@ class AutoExitBlockRule extends InsertRule {
   }
 
   @override
-  Delta? applyRule(Delta document, int index,
-      {int? len, Object? data, Attribute? attribute}) {
+  Delta? applyRule(
+    Delta document,
+    int index, {
+    int? len,
+    Object? data,
+    Attribute? attribute,
+  }) {
     if (data is! String || data != '\n') {
       return null;
     }
@@ -215,12 +237,18 @@ class AutoExitBlockRule extends InsertRule {
 ///
 /// This handles scenarios when a new line is added when at the end of a
 /// heading line. The newly added line should be a regular paragraph.
+@immutable
 class ResetLineFormatOnNewLineRule extends InsertRule {
   const ResetLineFormatOnNewLineRule();
 
   @override
-  Delta? applyRule(Delta document, int index,
-      {int? len, Object? data, Attribute? attribute}) {
+  Delta? applyRule(
+    Delta document,
+    int index, {
+    int? len,
+    Object? data,
+    Attribute? attribute,
+  }) {
     if (data is! String || data != '\n') {
       return null;
     }
@@ -246,12 +274,18 @@ class ResetLineFormatOnNewLineRule extends InsertRule {
 
 /// Handles all format operations which manipulate embeds.
 /// This rule wraps line breaks around video, not image.
+@immutable
 class InsertEmbedsRule extends InsertRule {
   const InsertEmbedsRule();
 
   @override
-  Delta? applyRule(Delta document, int index,
-      {int? len, Object? data, Attribute? attribute}) {
+  Delta? applyRule(
+    Delta document,
+    int index, {
+    int? len,
+    Object? data,
+    Attribute? attribute,
+  }) {
     if (data is String) {
       return null;
     }
@@ -304,6 +338,7 @@ class InsertEmbedsRule extends InsertRule {
 /// the URL pattern.
 ///
 /// The link attribute is applied as the user types.
+@immutable
 class AutoFormatMultipleLinksRule extends InsertRule {
   const AutoFormatMultipleLinksRule();
 
@@ -331,9 +366,25 @@ class AutoFormatMultipleLinksRule extends InsertRule {
   // http://www.example.com/?action=birds&brass=apparatus
   // https://example.net/
   // URL generator tool (https://www.randomlists.com/urls) is used.
-  static const _linkPattern =
+
+  static const _oneLineLinkPattern =
       r'(https?:\/\/|www\.)[\w-\.]+\.[\w-\.]+(\/*([\S]+)?)?';
-  static final linkRegExp = RegExp(_linkPattern, caseSensitive: false);
+  static const _detectLinkPattern =
+      r'https?:\/\/[\w\-]+(\.[\w\-]+)*(:\d+)?(\/[^\s]*)?';
+
+  /// It requires a valid link in one link
+  static final oneLineLinkRegExp = RegExp(
+    _oneLineLinkPattern,
+    caseSensitive: false,
+  );
+
+  /// It detect if there is a link in the text whatever if it in the middle etc
+  // Used to solve bug https://github.com/singerdmx/flutter-quill/issues/1432
+  static final detectLinkRegExp = RegExp(
+    _detectLinkPattern,
+    caseSensitive: false,
+  );
+  static final linkRegExp = oneLineLinkRegExp;
 
   @override
   Delta? applyRule(
@@ -342,6 +393,7 @@ class AutoFormatMultipleLinksRule extends InsertRule {
     int? len,
     Object? data,
     Attribute? attribute,
+    Object? extraData,
   }) {
     // Only format when inserting text.
     if (data is! String) return null;
@@ -376,8 +428,27 @@ class AutoFormatMultipleLinksRule extends InsertRule {
     // Build the segment of affected words.
     final affectedWords = '$leftWordPart$data$rightWordPart';
 
+    var usedRegExp = detectLinkRegExp;
+    final alternativeLinkRegExp = extraData;
+    if (alternativeLinkRegExp != null) {
+      try {
+        if (alternativeLinkRegExp is! String) {
+          throw ArgumentError.value(
+            alternativeLinkRegExp,
+            'alternativeLinkRegExp',
+            '`alternativeLinkRegExp` should be of type String',
+          );
+        }
+        final regPattern = alternativeLinkRegExp;
+        usedRegExp = RegExp(
+          regPattern,
+          caseSensitive: false,
+        );
+      } catch (_) {}
+    }
+
     // Check for URL pattern.
-    final matches = linkRegExp.allMatches(affectedWords);
+    final matches = usedRegExp.allMatches(affectedWords);
 
     // If there are no matches, do not apply any format.
     if (matches.isEmpty) return null;
@@ -427,12 +498,18 @@ class AutoFormatMultipleLinksRule extends InsertRule {
 
 /// Applies link format to text segment (which looks like a link) when user
 /// inserts space character after it.
+@immutable
 class AutoFormatLinksRule extends InsertRule {
   const AutoFormatLinksRule();
 
   @override
-  Delta? applyRule(Delta document, int index,
-      {int? len, Object? data, Attribute? attribute}) {
+  Delta? applyRule(
+    Delta document,
+    int index, {
+    int? len,
+    Object? data,
+    Attribute? attribute,
+  }) {
     if (data is! String || data != ' ') {
       return null;
     }
@@ -446,7 +523,7 @@ class AutoFormatLinksRule extends InsertRule {
     try {
       final cand = (prev.data as String).split('\n').last.split(' ').last;
       final link = Uri.parse(cand);
-      if (!['https', 'http'].contains(link.scheme)) {
+      if (!link.isHttpBasedUrl()) {
         return null;
       }
       final attributes = prev.attributes ?? <String, dynamic>{};
@@ -467,12 +544,18 @@ class AutoFormatLinksRule extends InsertRule {
 }
 
 /// Preserves inline styles when user inserts text inside formatted segment.
+@immutable
 class PreserveInlineStylesRule extends InsertRule {
   const PreserveInlineStylesRule();
 
   @override
-  Delta? applyRule(Delta document, int index,
-      {int? len, Object? data, Attribute? attribute}) {
+  Delta? applyRule(
+    Delta document,
+    int index, {
+    int? len,
+    Object? data,
+    Attribute? attribute,
+  }) {
     if (data is! String || data.contains('\n')) {
       return null;
     }
@@ -513,12 +596,18 @@ class PreserveInlineStylesRule extends InsertRule {
 }
 
 /// Fallback rule which simply inserts text as-is without any special handling.
+@immutable
 class CatchAllInsertRule extends InsertRule {
   const CatchAllInsertRule();
 
   @override
-  Delta applyRule(Delta document, int index,
-      {int? len, Object? data, Attribute? attribute}) {
+  Delta applyRule(
+    Delta document,
+    int index, {
+    int? len,
+    Object? data,
+    Attribute? attribute,
+  }) {
     return Delta()
       ..retain(index + (len ?? 0))
       ..insert(data);
@@ -538,6 +627,7 @@ _NextNewLine _getNextNewLine(DeltaIterator iterator) {
   return const _NextNewLine(null, null);
 }
 
+@immutable
 class _NextNewLine {
   const _NextNewLine(this.operation, this.skipped);
 

@@ -1,7 +1,12 @@
-import 'dart:async';
+import 'dart:async' show StreamController;
 
-import '../../widgets/embeds.dart';
-import '../quill_delta.dart';
+import 'package:html2md/html2md.dart' as html2md;
+import 'package:markdown/markdown.dart' as md;
+
+import '../../../markdown_quill.dart';
+
+import '../../../quill_delta.dart';
+import '../../widgets/quill/embeds.dart';
 import '../rules/rule.dart';
 import '../structs/doc_change.dart';
 import '../structs/history_changed.dart';
@@ -53,12 +58,13 @@ class Document {
     _rules.setCustomRules(customRules);
   }
 
-  final StreamController<DocChange> _observer = StreamController.broadcast();
+  final StreamController<DocChange> documentChangeObserver =
+      StreamController.broadcast();
 
-  final History _history = History();
+  final History history = History();
 
   /// Stream of [DocChange]s applied to this document.
-  Stream<DocChange> get changes => _observer.stream;
+  Stream<DocChange> get changes => documentChangeObserver.stream;
 
   /// Inserts [data] in this document at specified [index].
   ///
@@ -78,9 +84,9 @@ class Document {
       return Delta();
     }
 
-    final delta = _rules.apply(RuleType.INSERT, this, index,
+    final delta = _rules.apply(RuleType.insert, this, index,
         data: data, len: replaceLength);
-    compose(delta, ChangeSource.LOCAL);
+    compose(delta, ChangeSource.local);
     return delta;
   }
 
@@ -92,9 +98,9 @@ class Document {
   /// Returns an instance of [Delta] actually composed into this document.
   Delta delete(int index, int len) {
     assert(index >= 0 && len > 0);
-    final delta = _rules.apply(RuleType.DELETE, this, index, len: len);
+    final delta = _rules.apply(RuleType.delete, this, index, len: len);
     if (delta.isNotEmpty) {
-      compose(delta, ChangeSource.LOCAL);
+      compose(delta, ChangeSource.local);
     }
     return delta;
   }
@@ -142,10 +148,10 @@ class Document {
 
     var delta = Delta();
 
-    final formatDelta = _rules.apply(RuleType.FORMAT, this, index,
+    final formatDelta = _rules.apply(RuleType.format, this, index,
         len: len, attribute: attribute);
     if (formatDelta.isNotEmpty) {
-      compose(formatDelta, ChangeSource.LOCAL);
+      compose(formatDelta, ChangeSource.local);
       delta = delta.compose(formatDelta);
     }
 
@@ -156,7 +162,28 @@ class Document {
   /// included in the result.
   Style collectStyle(int index, int len) {
     final res = queryChild(index);
-    return (res.node as Line).collectStyle(res.offset, len);
+    Style rangeStyle;
+    if (len > 0) {
+      return (res.node as Line).collectStyle(res.offset, len);
+    }
+    if (res.offset == 0) {
+      rangeStyle = (res.node as Line).collectStyle(res.offset, len);
+      return rangeStyle.removeAll({
+        for (final attr in rangeStyle.values)
+          if (attr.isInline) attr
+      });
+    }
+    rangeStyle = (res.node as Line).collectStyle(res.offset - 1, len);
+    final linkAttribute = rangeStyle.attributes[Attribute.link.key];
+    if ((linkAttribute != null) &&
+        (linkAttribute.value !=
+            (res.node as Line)
+                .collectStyle(res.offset, len)
+                .attributes[Attribute.link.key]
+                ?.value)) {
+      return rangeStyle.removeAll({linkAttribute});
+    }
+    return rangeStyle;
   }
 
   /// Returns all styles and Embed for each node within selection
@@ -264,7 +291,7 @@ class Document {
   ///
   /// In case the [change] is invalid, behavior of this method is unspecified.
   void compose(Delta delta, ChangeSource changeSource) {
-    assert(!_observer.isClosed);
+    assert(!documentChangeObserver.isClosed);
     delta.trim();
     assert(delta.isNotEmpty);
 
@@ -292,28 +319,28 @@ class Document {
     try {
       _delta = _delta.compose(delta);
     } catch (e) {
-      throw '_delta compose failed';
+      throw StateError('_delta compose failed');
     }
 
     if (_delta != _root.toDelta()) {
-      throw 'Compose failed';
+      throw StateError('Compose failed');
     }
     final change = DocChange(originalDelta, delta, changeSource);
-    _observer.add(change);
-    _history.handleDocChange(change);
+    documentChangeObserver.add(change);
+    history.handleDocChange(change);
   }
 
   HistoryChanged undo() {
-    return _history.undo(this);
+    return history.undo(this);
   }
 
   HistoryChanged redo() {
-    return _history.redo(this);
+    return history.redo(this);
   }
 
-  bool get hasUndo => _history.hasUndo;
+  bool get hasUndo => history.hasUndo;
 
-  bool get hasRedo => _history.hasRedo;
+  bool get hasRedo => history.hasRedo;
 
   static Delta _transform(Delta delta) {
     final res = Delta();
@@ -363,8 +390,8 @@ class Document {
   }
 
   void close() {
-    _observer.close();
-    _history.clear();
+    documentChangeObserver.close();
+    history.clear();
   }
 
   /// Returns plain text representation of this document.
@@ -381,6 +408,7 @@ class Document {
       throw ArgumentError.value(doc, 'Document Delta cannot be empty.');
     }
 
+    // print(doc.last.data.runtimeType);
     assert((doc.last.data as String).endsWith('\n'));
 
     var offset = 0;
@@ -419,13 +447,50 @@ class Document {
         delta.first.data == '\n' &&
         delta.first.key == 'insert';
   }
+
+  /// Convert the HTML Raw string to [Delta]
+  ///
+  /// It will run using the following steps:
+  ///
+  /// 1. Convert the html to markdown string using `html2md` package
+  /// 2. Convert the markdown string to quill delta json string
+  /// 3. Decode the delta json string to [Delta]
+  ///
+  /// for more [info](https://github.com/singerdmx/flutter-quill/issues/1100)
+  static Delta fromHtml(String html) {
+    final markdown = html2md
+        .convert(
+          html,
+        )
+        .replaceAll('unsafe:', '');
+
+    final mdDocument = md.Document(encodeHtml: false);
+
+    final mdToDelta = MarkdownToDelta(markdownDocument: mdDocument);
+
+    return mdToDelta.convert(markdown);
+
+    // final deltaJsonString = markdownToDelta(markdown);
+    // final deltaJson = jsonDecode(deltaJsonString);
+    // if (deltaJson is! List) {
+    //   throw ArgumentError(
+    //     'The delta json string should be of type list when jsonDecode() it',
+    //   );
+    // }
+    // return Delta.fromJson(
+    //   deltaJson,
+    // );
+  }
 }
 
 /// Source of a [Change].
 enum ChangeSource {
   /// Change originated from a local action. Typically triggered by user.
-  LOCAL,
+  local,
 
   /// Change originated from a remote action.
-  REMOTE,
+  remote,
+
+  /// Silent change.
+  silent;
 }

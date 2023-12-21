@@ -1,8 +1,11 @@
-import '../documents/document.dart';
-import '../quill_delta.dart';
+import 'package:meta/meta.dart' show immutable;
 
+import '../../../quill_delta.dart';
+import '../documents/document.dart';
+
+@immutable
 class DocChange {
-  DocChange(
+  const DocChange(
     this.before,
     this.change,
     this.source,

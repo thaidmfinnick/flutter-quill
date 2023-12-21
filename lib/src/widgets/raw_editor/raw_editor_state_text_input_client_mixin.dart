@@ -1,13 +1,18 @@
-import 'dart:ui';
+import 'dart:ui' show lerpDouble;
 
-import 'package:flutter/animation.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
+import 'package:flutter/animation.dart' show Curves;
+import 'package:flutter/cupertino.dart' show CupertinoTheme;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart' show Theme;
+import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter/services.dart';
 
+import '../../models/documents/attribute.dart';
 import '../../models/documents/document.dart';
 import '../../utils/delta.dart';
-import '../editor.dart';
+import '../../utils/font.dart';
+import '../editor/editor.dart';
+import 'raw_editor.dart';
 
 mixin RawEditorStateTextInputClientMixin on EditorState
     implements TextInputClient {
@@ -27,7 +32,8 @@ mixin RawEditorStateTextInputClientMixin on EditorState
   /// - cmd/ctrl+c shortcut to copy.
   /// - cmd/ctrl+a to select all.
   /// - Changing the selection using a physical keyboard.
-  bool get shouldCreateInputConnection => kIsWeb || !widget.readOnly;
+  bool get shouldCreateInputConnection =>
+      kIsWeb || !widget.configurations.readOnly;
 
   /// Returns `true` if there is open input connection.
   bool get hasConnection =>
@@ -36,9 +42,10 @@ mixin RawEditorStateTextInputClientMixin on EditorState
   /// Opens or closes input connection based on the current state of
   /// [focusNode] and [value].
   void openOrCloseConnection() {
-    if (widget.focusNode.hasFocus && widget.focusNode.consumeKeyboardToken()) {
+    if (widget.configurations.focusNode.hasFocus &&
+        widget.configurations.focusNode.consumeKeyboardToken()) {
       openConnectionIfNeeded();
-    } else if (!widget.focusNode.hasFocus) {
+    } else if (!widget.configurations.focusNode.hasFocus) {
       closeConnectionIfNeeded();
     }
   }
@@ -54,14 +61,18 @@ mixin RawEditorStateTextInputClientMixin on EditorState
         this,
         TextInputConfiguration(
           inputType: TextInputType.multiline,
-          readOnly: widget.readOnly,
-          inputAction: TextInputAction.newline,
-          enableSuggestions: !widget.readOnly,
-          keyboardAppearance: widget.keyboardAppearance,
-          textCapitalization: widget.textCapitalization,
-          allowedMimeTypes: widget.contentInsertionConfiguration == null
-              ? const <String>[]
-              : widget.contentInsertionConfiguration!.allowedMimeTypes,
+          readOnly: widget.configurations.readOnly,
+          inputAction: widget.configurations.textInputAction,
+          enableSuggestions: !widget.configurations.readOnly,
+          keyboardAppearance: widget.configurations.keyboardAppearance ??
+              CupertinoTheme.maybeBrightnessOf(context) ??
+              Theme.of(context).brightness,
+          textCapitalization: widget.configurations.textCapitalization,
+          allowedMimeTypes:
+              widget.configurations.contentInsertionConfiguration == null
+                  ? const <String>[]
+                  : widget.configurations.contentInsertionConfiguration!
+                      .allowedMimeTypes,
         ),
       );
 
@@ -187,10 +198,44 @@ mixin RawEditorStateTextInputClientMixin on EditorState
     final cursorPosition = value.selection.extentOffset;
     final diff = getDiff(oldText, text, cursorPosition);
     if (diff.deleted.isEmpty && diff.inserted.isEmpty) {
-      widget.controller.updateSelection(value.selection, ChangeSource.LOCAL);
+      widget.configurations.controller
+          .updateSelection(value.selection, ChangeSource.local);
     } else {
-      widget.controller.replaceText(
-          diff.start, diff.deleted.length, diff.inserted, value.selection);
+      widget.configurations.controller.replaceText(
+        diff.start,
+        diff.deleted.length,
+        diff.inserted,
+        value.selection,
+      );
+
+      if (widget.configurations.controller.selectedFontFamily != null) {
+        widget.configurations.controller.formatSelection(
+          Attribute.fromKeyValue(
+            Attribute.font.key,
+            widget.configurations.controller.selectedFontFamily,
+          ),
+        );
+      }
+
+      if (widget.configurations.controller.selectedFontSize != null) {
+        widget.configurations.controller.formatSelection(
+          Attribute.fromKeyValue(
+            Attribute.size.key,
+            widget.configurations.controller.selectedFontSize == '0'
+                ? null
+                : getFontSize(
+                    widget.configurations.controller.selectedFontSize,
+                  ),
+          ),
+        );
+      }
+      // if (widget.configurations.controller.keepStyleOnNewLine) {
+      //   widget.configurations.controller.selectedStyles.forEach((key, value) {
+      //     if (value ?? false) {
+      //       widget.configurations.controller.formatSelection(key);
+      //     }
+      //   });
+      // }
     }
   }
 

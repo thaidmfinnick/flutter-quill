@@ -1,23 +1,26 @@
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart' show TapGestureRecognizer;
+import 'package:flutter/widgets.dart';
+import 'package:flutter_quill/flutter_quill.dart' show DefaultStyles;
+import 'package:url_launcher/url_launcher.dart' show launchUrl;
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class YoutubeVideoApp extends StatefulWidget {
   const YoutubeVideoApp(
-      {required this.videoUrl, required this.context, required this.readOnly});
+      {required this.videoUrl,
+      required this.context,
+      required this.readOnly,
+      super.key});
 
   final String videoUrl;
   final BuildContext context;
   final bool readOnly;
 
   @override
-  _YoutubeVideoAppState createState() => _YoutubeVideoAppState();
+  YoutubeVideoAppState createState() => YoutubeVideoAppState();
 }
 
-class _YoutubeVideoAppState extends State<YoutubeVideoApp> {
-  var _youtubeController;
+class YoutubeVideoAppState extends State<YoutubeVideoApp> {
+  YoutubePlayerController? _youtubeController;
 
   @override
   void initState() {
@@ -36,26 +39,32 @@ class _YoutubeVideoAppState extends State<YoutubeVideoApp> {
   @override
   Widget build(BuildContext context) {
     final defaultStyles = DefaultStyles.getInstance(context);
-    if (_youtubeController == null) {
+    final youtubeController = _youtubeController;
+
+    if (youtubeController == null) {
       if (widget.readOnly) {
         return RichText(
           text: TextSpan(
-              text: widget.videoUrl,
-              style: defaultStyles.link,
-              recognizer: TapGestureRecognizer()
-                ..onTap = () => launchUrl(Uri.parse(widget.videoUrl))),
+            text: widget.videoUrl,
+            style: defaultStyles.link,
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => launchUrl(
+                    Uri.parse(widget.videoUrl),
+                  ),
+          ),
         );
       }
 
       return RichText(
-          text: TextSpan(text: widget.videoUrl, style: defaultStyles.link));
+        text: TextSpan(text: widget.videoUrl, style: defaultStyles.link),
+      );
     }
 
-    return Container(
+    return SizedBox(
       height: 300,
       child: YoutubePlayerBuilder(
         player: YoutubePlayer(
-          controller: _youtubeController,
+          controller: youtubeController,
           showVideoProgressIndicator: true,
         ),
         builder: (context, player) {
@@ -73,7 +82,7 @@ class _YoutubeVideoAppState extends State<YoutubeVideoApp> {
 
   @override
   void dispose() {
+    _youtubeController?.dispose();
     super.dispose();
-    _youtubeController.dispose();
   }
 }

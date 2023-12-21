@@ -1,32 +1,119 @@
+import 'dart:io' show Platform;
+
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kIsWeb, visibleForTesting;
 
-bool isMobile([TargetPlatform? targetPlatform]) {
-  targetPlatform ??= defaultTargetPlatform;
-  return {TargetPlatform.iOS, TargetPlatform.android}.contains(targetPlatform);
+/// If you want to override the [kIsWeb] use [overrideIsWeb] but it's only
+/// for testing
+bool isWeb({
+  @visibleForTesting bool? overrideIsWeb,
+}) {
+  return overrideIsWeb ?? kIsWeb;
 }
 
-bool isDesktop([TargetPlatform? targetPlatform]) {
-  targetPlatform ??= defaultTargetPlatform;
+/// [supportWeb] is a parameter that ask you if we should care about web support
+/// if the value is true then we will return the result no matter if we are
+/// on web or using a native app to run the flutter app
+bool isMobile({
+  required bool supportWeb,
+  TargetPlatform? platform,
+  bool? overrideIsWeb,
+}) {
+  if (isWeb(overrideIsWeb: overrideIsWeb) && !supportWeb) return false;
+  platform ??= defaultTargetPlatform;
+  return {TargetPlatform.iOS, TargetPlatform.android}.contains(platform);
+}
+
+/// [supportWeb] is a parameter that ask you if we should care about web support
+/// if the value is true then we will return the result no matter if we are
+/// on web or using a native app to run the flutter app
+bool isDesktop({
+  required bool supportWeb,
+  TargetPlatform? platform,
+  bool? overrideIsWeb,
+}) {
+  if (isWeb(overrideIsWeb: overrideIsWeb) && !supportWeb) return false;
+  platform ??= defaultTargetPlatform;
   return {TargetPlatform.macOS, TargetPlatform.linux, TargetPlatform.windows}
-      .contains(targetPlatform);
+      .contains(platform);
 }
 
-bool isKeyboardOS([TargetPlatform? targetPlatform]) {
-  targetPlatform ??= defaultTargetPlatform;
-  return isDesktop(targetPlatform) || targetPlatform == TargetPlatform.fuchsia;
+/// [supportWeb] is a parameter that ask you if we should care about web support
+/// if the value is true then we will return the result no matter if we are
+/// on web or using a native app to run the flutter app
+bool isKeyboardOS({
+  required bool supportWeb,
+  TargetPlatform? platform,
+  bool? overrideIsWeb,
+}) {
+  platform ??= defaultTargetPlatform;
+  return isDesktop(
+          platform: platform,
+          supportWeb: supportWeb,
+          overrideIsWeb: overrideIsWeb) ||
+      platform == TargetPlatform.fuchsia;
 }
 
-bool isAppleOS([TargetPlatform? targetPlatform]) {
-  targetPlatform ??= defaultTargetPlatform;
+/// [supportWeb] is a parameter that ask you if we should care about web support
+/// if the value is true then we will return the result no matter if we are
+/// on web or using a native app to run the flutter app
+bool isAppleOS({
+  required bool supportWeb,
+  TargetPlatform? platform,
+  bool? overrideIsWeb,
+}) {
+  if (isWeb(overrideIsWeb: overrideIsWeb) && !supportWeb) return false;
+  platform ??= defaultTargetPlatform;
   return {
     TargetPlatform.macOS,
     TargetPlatform.iOS,
-  }.contains(targetPlatform);
+  }.contains(platform);
 }
 
-Future<bool> isIOSSimulator() async {
-  if (!isAppleOS()) {
+/// [supportWeb] is a parameter that ask you if we should care about web support
+/// if the value is true then we will return the result no matter if we are
+/// on web or using a native app to run the flutter app
+bool isMacOS({
+  required bool supportWeb,
+  TargetPlatform? platform,
+  bool? overrideIsWeb,
+}) {
+  if (isWeb(overrideIsWeb: overrideIsWeb) && !supportWeb) return false;
+  platform ??= defaultTargetPlatform;
+  return TargetPlatform.macOS == platform;
+}
+
+/// [supportWeb] is a parameter that ask you if we should care about web support
+/// if the value is true then we will return the result no matter if we are
+/// on web or using a native app to run the flutter app
+bool isIOS({
+  required bool supportWeb,
+  TargetPlatform? platform,
+  bool? overrideIsWeb,
+}) {
+  if (isWeb(overrideIsWeb: overrideIsWeb) && !supportWeb) return false;
+  platform ??= defaultTargetPlatform;
+  return TargetPlatform.iOS == platform;
+}
+
+/// [supportWeb] is a parameter that ask you if we should care about web support
+/// if the value is true then we will return the result no matter if we are
+/// on web or using a native app to run the flutter app
+bool isAndroid({
+  required bool supportWeb,
+  TargetPlatform? platform,
+  bool? overrideIsWeb,
+}) {
+  if (isWeb(overrideIsWeb: overrideIsWeb) && !supportWeb) return false;
+  platform ??= defaultTargetPlatform;
+  return TargetPlatform.android == platform;
+}
+
+Future<bool> isIOSSimulator({
+  bool? overrideIsWeb,
+}) async {
+  if (!isAppleOS(supportWeb: false, overrideIsWeb: overrideIsWeb)) {
     return false;
   }
 
@@ -39,4 +126,11 @@ Future<bool> isIOSSimulator() async {
     return !iosInfo.isPhysicalDevice;
   }
   return false;
+}
+
+bool isFlutterTest({
+  bool? overrideIsWeb,
+}) {
+  if (isWeb(overrideIsWeb: overrideIsWeb)) return false;
+  return Platform.environment.containsKey('FLUTTER_TEST');
 }

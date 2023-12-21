@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_quill/quill_delta.dart';
+import 'package:test/test.dart';
 
 void main() {
   const testDocumentContents = 'data';
@@ -9,7 +10,7 @@ void main() {
   setUp(() {
     controller = QuillController.basic()
       ..compose(Delta()..insert(testDocumentContents),
-          const TextSelection.collapsed(offset: 0), ChangeSource.LOCAL);
+          const TextSelection.collapsed(offset: 0), ChangeSource.local);
   });
 
   group('controller', () {
@@ -31,7 +32,7 @@ void main() {
       controller
         ..formatText(0, 5, Attribute.h1)
         ..updateSelection(const TextSelection(baseOffset: 0, extentOffset: 4),
-            ChangeSource.LOCAL);
+            ChangeSource.local);
 
       expect(controller.getSelectionStyle().values, [Attribute.h1]);
     });
@@ -41,7 +42,7 @@ void main() {
       // With selection range
       controller
         ..updateSelection(const TextSelection(baseOffset: 0, extentOffset: 4),
-            ChangeSource.LOCAL)
+            ChangeSource.local)
         ..addListener(() {
           listenerCalled = true;
         })
@@ -58,12 +59,12 @@ void main() {
       // With collapsed selection
       controller
         ..updateSelection(
-            const TextSelection.collapsed(offset: 0), ChangeSource.LOCAL)
+            const TextSelection.collapsed(offset: 0), ChangeSource.local)
         ..indentSelection(true);
       expect(controller.getSelectionStyle().values, [Attribute.indentL1]);
       controller
         ..updateSelection(
-            const TextSelection.collapsed(offset: 0), ChangeSource.LOCAL)
+            const TextSelection.collapsed(offset: 0), ChangeSource.local)
         ..indentSelection(true);
       expect(controller.getSelectionStyle().values, [Attribute.indentL2]);
       controller.indentSelection(false);
@@ -75,30 +76,34 @@ void main() {
     test('indentSelection with multiline document', () {
       controller
         ..compose(Delta()..insert('line1\nline2\nline3\n'),
-            const TextSelection.collapsed(offset: 0), ChangeSource.LOCAL)
+            const TextSelection.collapsed(offset: 0), ChangeSource.local)
         // Indent first line
         ..updateSelection(
-            const TextSelection.collapsed(offset: 0), ChangeSource.LOCAL)
+            const TextSelection.collapsed(offset: 0), ChangeSource.local)
         ..indentSelection(true);
       expect(controller.getSelectionStyle().values, [Attribute.indentL1]);
 
       // Indent first two lines
       controller
         ..updateSelection(const TextSelection(baseOffset: 0, extentOffset: 11),
-            ChangeSource.LOCAL)
+            ChangeSource.local)
         ..indentSelection(true);
 
       // Should have both L1 and L2 indent attributes in selection.
-      expect(controller.getAllSelectionStyles(),
-          contains(Style().put(Attribute.indentL1).put(Attribute.indentL2)));
+      expect(
+        controller.getAllSelectionStyles(),
+        contains(
+          const Style().put(Attribute.indentL1).put(Attribute.indentL2),
+        ),
+      );
 
       // Remaining lines should have no attributes.
       controller.updateSelection(
           TextSelection(
               baseOffset: 12,
               extentOffset: controller.document.toPlainText().length - 1),
-          ChangeSource.LOCAL);
-      expect(controller.getAllSelectionStyles(), everyElement(Style()));
+          ChangeSource.local);
+      expect(controller.getAllSelectionStyles(), everyElement(const Style()));
     });
 
     test('getAllIndividualSelectionStylesAndEmbed', () {
@@ -106,18 +111,18 @@ void main() {
         ..formatText(0, 2, Attribute.bold)
         ..replaceText(2, 2, BlockEmbed.image('/test'), null)
         ..updateSelection(const TextSelection(baseOffset: 0, extentOffset: 4),
-            ChangeSource.REMOTE);
+            ChangeSource.remote);
       final result = controller.getAllIndividualSelectionStylesAndEmbed();
       expect(result.length, 2);
       expect(result[0].offset, 0);
-      expect(result[0].value, Style().put(Attribute.bold));
+      expect(result[0].value, const Style().put(Attribute.bold));
       expect((result[1].value as Embeddable).type, BlockEmbed.imageType);
     });
 
     test('getPlainText', () {
       controller.updateSelection(
           const TextSelection(baseOffset: 0, extentOffset: 4),
-          ChangeSource.LOCAL);
+          ChangeSource.local);
 
       expect(controller.getPlainText(), testDocumentContents);
     });
@@ -125,15 +130,18 @@ void main() {
     test('getAllSelectionStyles', () {
       controller.formatText(0, 2, Attribute.bold);
       expect(controller.getAllSelectionStyles(),
-          contains(Style().put(Attribute.bold)));
+          contains(const Style().put(Attribute.bold)));
     });
 
     test('undo', () {
       var listenerCalled = false;
       controller.updateSelection(
-          const TextSelection.collapsed(offset: 4), ChangeSource.LOCAL);
+          const TextSelection.collapsed(offset: 4), ChangeSource.local);
 
-      expect(controller.document.toDelta(), Delta()..insert('data\n'));
+      expect(
+        controller.document.toDelta(),
+        Delta()..insert('data\n'),
+      );
       controller
         ..addListener(() {
           listenerCalled = true;
@@ -146,7 +154,7 @@ void main() {
     test('redo', () {
       var listenerCalled = false;
       controller.updateSelection(
-          const TextSelection.collapsed(offset: 4), ChangeSource.LOCAL);
+          const TextSelection.collapsed(offset: 4), ChangeSource.local);
 
       expect(controller.document.toDelta(), Delta()..insert('data\n'));
       controller.undo();
@@ -185,7 +193,7 @@ void main() {
 
     test('formatTextStyle', () {
       var listenerCalled = false;
-      final style = Style().put(Attribute.bold).put(Attribute.italic);
+      final style = const Style().put(Attribute.bold).put(Attribute.italic);
       controller
         ..addListener(() {
           listenerCalled = true;
@@ -193,7 +201,8 @@ void main() {
         ..formatTextStyle(0, 2, style);
       expect(listenerCalled, isTrue);
       expect(controller.document.collectAllStyles(0, 2), contains(style));
-      expect(controller.document.collectAllStyles(2, 4), everyElement(Style()));
+      expect(controller.document.collectAllStyles(2, 4),
+          everyElement(const Style()));
     });
 
     test('formatText', () {
@@ -205,30 +214,32 @@ void main() {
         ..formatText(0, 2, Attribute.bold);
       expect(listenerCalled, isTrue);
       expect(controller.document.collectAllStyles(0, 2),
-          contains(Style().put(Attribute.bold)));
-      expect(controller.document.collectAllStyles(2, 4), everyElement(Style()));
+          contains(const Style().put(Attribute.bold)));
+      expect(controller.document.collectAllStyles(2, 4),
+          everyElement(const Style()));
     });
 
     test('formatSelection', () {
       var listenerCalled = false;
       controller
         ..updateSelection(const TextSelection(baseOffset: 0, extentOffset: 2),
-            ChangeSource.LOCAL)
+            ChangeSource.local)
         ..addListener(() {
           listenerCalled = true;
         })
         ..formatSelection(Attribute.bold);
       expect(listenerCalled, isTrue);
       expect(controller.document.collectAllStyles(0, 2),
-          contains(Style().put(Attribute.bold)));
-      expect(controller.document.collectAllStyles(2, 4), everyElement(Style()));
+          contains(const Style().put(Attribute.bold)));
+      expect(controller.document.collectAllStyles(2, 4),
+          everyElement(const Style()));
     });
 
     test('moveCursorToStart', () {
       var listenerCalled = false;
       controller
         ..updateSelection(
-            const TextSelection.collapsed(offset: 4), ChangeSource.LOCAL)
+            const TextSelection.collapsed(offset: 4), ChangeSource.local)
         ..addListener(() {
           listenerCalled = true;
         });
@@ -271,7 +282,7 @@ void main() {
         ..addListener(() {
           listenerCalled = true;
         })
-        ..updateSelection(selection, ChangeSource.LOCAL);
+        ..updateSelection(selection, ChangeSource.local);
 
       expect(listenerCalled, isTrue);
       expect(controller.selection, selection);
@@ -285,7 +296,7 @@ void main() {
           listenerCalled = true;
         })
         ..compose(Delta()..insert('test '),
-            const TextSelection.collapsed(offset: 0), ChangeSource.LOCAL);
+            const TextSelection.collapsed(offset: 0), ChangeSource.local);
 
       expect(listenerCalled, isTrue);
       expect(controller.document.toDelta(),

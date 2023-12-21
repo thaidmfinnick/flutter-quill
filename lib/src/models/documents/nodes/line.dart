@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 
-import '../../../widgets/embeds.dart';
-import '../../quill_delta.dart';
+import '../../../../quill_delta.dart';
+import '../../../widgets/quill/embeds.dart';
 import '../../structs/offset_value.dart';
 import '../attribute.dart';
 import '../style.dart';
@@ -15,13 +15,13 @@ import 'node.dart';
 
 /// A line of rich text in a Quill document.
 ///
-/// Line serves as a container for [Leaf]s, like [Text] and [Embed].
+/// Line serves as a container for [Leaf]s, like [QuillText] and [Embed].
 ///
 /// When a line contains an embed, it fully occupies the line, no other embeds
 /// or text nodes are allowed.
-class Line extends Container<Leaf?> {
+base class Line extends Container<Leaf?> {
   @override
-  Leaf get defaultChild => Text();
+  Leaf get defaultChild => QuillText();
 
   @override
   int get length => super.length + 1;
@@ -136,15 +136,15 @@ class Line extends Container<Leaf?> {
     if (isLineFormat) {
       assert(
           style.values.every((attr) =>
-              attr.scope == AttributeScope.BLOCK ||
-              attr.scope == AttributeScope.IGNORE),
+              attr.scope == AttributeScope.block ||
+              attr.scope == AttributeScope.ignore),
           'It is not allowed to apply inline attributes to line itself.');
       _format(style);
     } else {
       // Otherwise forward to children as it's an inline format update.
       assert(style.values.every((attr) =>
-          attr.scope == AttributeScope.INLINE ||
-          attr.scope == AttributeScope.IGNORE));
+          attr.scope == AttributeScope.inline ||
+          attr.scope == AttributeScope.ignore));
       assert(index + local != thisLength);
       super.retain(index, local, style);
     }
@@ -172,9 +172,8 @@ class Line extends Container<Leaf?> {
     }
 
     final remaining = len - local;
-    if (remaining > 0) {
-      assert(nextLine != null);
-      nextLine!.delete(0, remaining);
+    if (remaining > 0 && nextLine != null) {
+      nextLine?.delete(0, remaining);
     }
 
     if (isLFDeleted && isNotEmpty) {
@@ -183,12 +182,12 @@ class Line extends Container<Leaf?> {
 
       // nextLine might have been unmounted since last assert so we need to
       // check again we still have a line after us.
-      assert(nextLine != null);
-
-      // Move remaining children in this line to the next line so that all
-      // attributes of nextLine are preserved.
-      nextLine!.moveChildToNewParent(this);
-      moveChildToNewParent(nextLine);
+      if (nextLine != null) {
+        // Move remaining children in this line to the next line so that all
+        // attributes of nextLine are preserved.
+        nextLine?.moveChildToNewParent(this);
+        moveChildToNewParent(nextLine);
+      }
     }
 
     if (isLFDeleted) {
@@ -318,6 +317,14 @@ class Line extends Container<Leaf?> {
   void _insertSafe(int index, Object data, Style? style) {
     assert(index == 0 || (index > 0 && index < length));
 
+    // var inlineStyles = style;
+    // if (style != null) {
+    //   final nonInlineStyles =
+    //       style.attributes.values.where((v) => !v.isInline).toSet();
+    //   final styleToApply = style.removeAll(nonInlineStyles);
+    //   inlineStyles = styleToApply;
+    // }
+
     if (data is String) {
       assert(!data.contains('\n'));
       if (data.isEmpty) {
@@ -349,22 +356,17 @@ class Line extends Container<Leaf?> {
   /// In essence, it is INTERSECTION of each individual segment's styles
   Style collectStyle(int offset, int len) {
     final local = math.min(length - offset, len);
-    var result = Style();
+    var result = const Style();
     final excluded = <Attribute>{};
 
-    void _handle(Style style) {
-      if (result.isEmpty) {
-        excluded.addAll(style.values);
-      } else {
-        for (final attr in result.values) {
-          if (!style.containsKey(attr.key)) {
-            excluded.add(attr);
-          }
+    void handle(Style style) {
+      for (final attr in result.values) {
+        if (!style.containsKey(attr.key) ||
+            (style.attributes[attr.key] != attr.value)) {
+          excluded.add(attr);
         }
       }
-      final remaining = style.removeAll(excluded);
       result = result.removeAll(excluded);
-      result = result.mergeAll(remaining);
     }
 
     final data = queryChild(offset, true);
@@ -374,7 +376,7 @@ class Line extends Container<Leaf?> {
       var pos = node.length - data.offset;
       while (!node!.isLast && pos < local) {
         node = node.next as Leaf;
-        _handle(node.style);
+        handle(node.style);
         pos += node.length;
       }
     }
@@ -388,7 +390,7 @@ class Line extends Container<Leaf?> {
     final remaining = len - local;
     if (remaining > 0 && nextLine != null) {
       final rest = nextLine!.collectStyle(0, remaining);
-      _handle(rest);
+      handle(rest);
     }
 
     return result;
@@ -406,14 +408,14 @@ class Line extends Container<Leaf?> {
     if (node != null) {
       var pos = 0;
       pos = node.length - data.offset;
-      if (node is Text && node.style.isNotEmpty) {
+      if (node is QuillText && node.style.isNotEmpty) {
         result.add(OffsetValue(beg, node.style, node.length));
       } else if (node.value is Embeddable) {
         result.add(OffsetValue(beg, node.value as Embeddable, node.length));
       }
       while (!node!.isLast && pos < local) {
         node = node.next as Leaf;
-        if (node is Text && node.style.isNotEmpty) {
+        if (node is QuillText && node.style.isNotEmpty) {
           result.add(OffsetValue(pos + beg, node.style, node.length));
         } else if (node.value is Embeddable) {
           result.add(
@@ -527,35 +529,35 @@ class Line extends Container<Leaf?> {
   }
 
   int _getPlainText(int offset, int len, StringBuffer plainText) {
-    var _len = len;
+    var len0 = len;
     final data = queryChild(offset, false);
     var node = data.node as Leaf?;
 
-    while (_len > 0) {
+    while (len0 > 0) {
       if (node == null) {
         // blank line
         plainText.write('\n');
-        _len -= 1;
+        len0 -= 1;
       } else {
-        _len = _getNodeText(node, plainText, offset - node.offset, _len);
+        len0 = _getNodeText(node, plainText, offset - node.offset, len0);
 
-        while (!node!.isLast && _len > 0) {
+        while (!node!.isLast && len0 > 0) {
           node = node.next as Leaf;
-          _len = _getNodeText(node, plainText, 0, _len);
+          len0 = _getNodeText(node, plainText, 0, len0);
         }
 
-        if (_len > 0) {
+        if (len0 > 0) {
           // end of this line
           plainText.write('\n');
-          _len -= 1;
+          len0 -= 1;
         }
       }
 
-      if (_len > 0 && nextLine != null) {
-        _len = nextLine!._getPlainText(0, _len, plainText);
+      if (len0 > 0 && nextLine != null) {
+        len0 = nextLine!._getPlainText(0, len0, plainText);
       }
     }
 
-    return _len;
+    return len0;
   }
 }

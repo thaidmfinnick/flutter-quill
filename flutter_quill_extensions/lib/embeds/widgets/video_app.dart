@@ -1,10 +1,12 @@
-import 'dart:io';
+import 'dart:io' show File;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
+
+import '../../flutter_quill_extensions.dart';
 
 /// Widget for playing back video
 /// Refer to https://github.com/flutter/plugins/tree/master/packages/video_player/video_player
@@ -13,6 +15,7 @@ class VideoApp extends StatefulWidget {
     required this.videoUrl,
     required this.context,
     required this.readOnly,
+    super.key,
     this.onVideoInit,
   });
 
@@ -22,10 +25,10 @@ class VideoApp extends StatefulWidget {
   final void Function(GlobalKey videoContainerKey)? onVideoInit;
 
   @override
-  _VideoAppState createState() => _VideoAppState();
+  VideoAppState createState() => VideoAppState();
 }
 
-class _VideoAppState extends State<VideoApp> {
+class VideoAppState extends State<VideoApp> {
   late VideoPlayerController _controller;
   GlobalKey videoContainerKey = GlobalKey();
 
@@ -33,7 +36,7 @@ class _VideoAppState extends State<VideoApp> {
   void initState() {
     super.initState();
 
-    _controller = widget.videoUrl.startsWith('http')
+    _controller = isHttpBasedUrl(widget.videoUrl)
         ? VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
         : VideoPlayerController.file(File(widget.videoUrl))
       ..initialize().then((_) {
@@ -55,15 +58,22 @@ class _VideoAppState extends State<VideoApp> {
       if (widget.readOnly) {
         return RichText(
           text: TextSpan(
-              text: widget.videoUrl,
-              style: defaultStyles.link,
-              recognizer: TapGestureRecognizer()
-                ..onTap = () => launchUrl(Uri.parse(widget.videoUrl))),
+            text: widget.videoUrl,
+            style: defaultStyles.link,
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => launchUrl(
+                    Uri.parse(widget.videoUrl),
+                  ),
+          ),
         );
       }
 
       return RichText(
-          text: TextSpan(text: widget.videoUrl, style: defaultStyles.link));
+        text: TextSpan(
+          text: widget.videoUrl,
+          style: defaultStyles.link,
+        ),
+      );
     } else if (!_controller.value.isInitialized) {
       return VideoProgressIndicator(
         _controller,
@@ -74,7 +84,6 @@ class _VideoAppState extends State<VideoApp> {
 
     return Container(
       key: videoContainerKey,
-      // height: 300,
       child: InkWell(
         onTap: () {
           setState(() {

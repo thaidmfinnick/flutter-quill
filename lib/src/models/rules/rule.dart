@@ -1,28 +1,46 @@
+import 'package:meta/meta.dart' show immutable;
+
+import '../../../quill_delta.dart';
 import '../documents/attribute.dart';
 import '../documents/document.dart';
-import '../quill_delta.dart';
 import 'delete.dart';
 import 'format.dart';
 import 'insert.dart';
 
-enum RuleType { INSERT, DELETE, FORMAT }
+enum RuleType { insert, delete, format }
 
+@immutable
 abstract class Rule {
   const Rule();
 
-  Delta? apply(Delta document, int index,
-      {int? len, Object? data, Attribute? attribute}) {
+  Delta? apply(
+    Delta document,
+    int index, {
+    int? len,
+    Object? data,
+    Attribute? attribute,
+  }) {
     validateArgs(len, data, attribute);
-    return applyRule(document, index,
-        len: len, data: data, attribute: attribute);
+    return applyRule(
+      document,
+      index,
+      len: len,
+      data: data,
+      attribute: attribute,
+    );
   }
 
   void validateArgs(int? len, Object? data, Attribute? attribute);
 
   /// Applies heuristic rule to an operation on a [document] and returns
   /// resulting [Delta].
-  Delta? applyRule(Delta document, int index,
-      {int? len, Object? data, Attribute? attribute});
+  Delta? applyRule(
+    Delta document,
+    int index, {
+    int? len,
+    Object? data,
+    Attribute? attribute,
+  });
 
   RuleType get type;
 }
@@ -33,24 +51,24 @@ class Rules {
   List<Rule> _customRules = [];
 
   final List<Rule> _rules;
-  static final Rules _instance = Rules([
-    const FormatLinkAtCaretPositionRule(),
-    const ResolveLineFormatRule(),
-    const ResolveInlineFormatRule(),
-    const ResolveImageFormatRule(),
-    const InsertEmbedsRule(),
-    const AutoExitBlockRule(),
-    const PreserveBlockStyleOnInsertRule(),
-    const PreserveLineStyleOnSplitRule(),
-    const ResetLineFormatOnNewLineRule(),
-    const AutoFormatLinksRule(),
-    const AutoFormatMultipleLinksRule(),
-    const PreserveInlineStylesRule(),
-    const CatchAllInsertRule(),
-    const EnsureEmbedLineRule(),
-    const PreserveLineStyleOnMergeRule(),
-    const CatchAllDeleteRule(),
-    const EnsureLastLineBreakDeleteRule()
+  static final Rules _instance = Rules(const [
+    FormatLinkAtCaretPositionRule(),
+    ResolveLineFormatRule(),
+    ResolveInlineFormatRule(),
+    ResolveImageFormatRule(),
+    InsertEmbedsRule(),
+    AutoExitBlockRule(),
+    PreserveBlockStyleOnInsertRule(),
+    PreserveLineStyleOnSplitRule(),
+    ResetLineFormatOnNewLineRule(),
+    AutoFormatLinksRule(),
+    AutoFormatMultipleLinksRule(),
+    PreserveInlineStylesRule(),
+    CatchAllInsertRule(),
+    EnsureEmbedLineRule(),
+    PreserveLineStyleOnMergeRule(),
+    CatchAllDeleteRule(),
+    EnsureLastLineBreakDeleteRule()
   ]);
 
   static Rules getInstance() => _instance;
@@ -59,8 +77,14 @@ class Rules {
     _customRules = customRules;
   }
 
-  Delta apply(RuleType ruleType, Document document, int index,
-      {int? len, Object? data, Attribute? attribute}) {
+  Delta apply(
+    RuleType ruleType,
+    Document document,
+    int index, {
+    int? len,
+    Object? data,
+    Attribute? attribute,
+  }) {
     final delta = document.toDelta();
     for (final rule in _customRules + _rules) {
       if (rule.type != ruleType) {
@@ -76,6 +100,8 @@ class Rules {
         rethrow;
       }
     }
-    throw 'Apply rules failed';
+    throw FormatException(
+      'Apply delta rules failed. No matching rule found for type: $ruleType',
+    );
   }
 }

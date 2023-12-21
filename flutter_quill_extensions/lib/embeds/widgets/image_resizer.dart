@@ -1,30 +1,32 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
+import 'package:flutter/cupertino.dart'
+    show CupertinoActionSheet, CupertinoActionSheetAction;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
+import 'package:flutter/material.dart' show Slider, Card;
+import 'package:flutter/scheduler.dart' show SchedulerBinding;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_quill/translations.dart';
 
 class ImageResizer extends StatefulWidget {
-  const ImageResizer(
-      {required this.imageWidth,
-      required this.imageHeight,
-      required this.maxWidth,
-      required this.maxHeight,
-      required this.onImageResize,
-      Key? key})
-      : super(key: key);
+  const ImageResizer({
+    required this.imageWidth,
+    required this.imageHeight,
+    required this.maxWidth,
+    required this.maxHeight,
+    required this.onImageResize,
+    super.key,
+  });
 
   final double? imageWidth;
   final double? imageHeight;
   final double maxWidth;
   final double maxHeight;
-  final Function(double, double) onImageResize;
+  final Function(double width, double height) onImageResize;
 
   @override
-  _ImageResizerState createState() => _ImageResizerState();
+  ImageResizerState createState() => ImageResizerState();
 }
 
-class _ImageResizerState extends State<ImageResizer> {
+class ImageResizerState extends State<ImageResizer> {
   late double _width;
   late double _height;
 
@@ -42,61 +44,83 @@ class _ImageResizerState extends State<ImageResizer> {
         return _showCupertinoMenu();
       case TargetPlatform.android:
         return _showMaterialMenu();
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+      case TargetPlatform.linux:
+      case TargetPlatform.fuchsia:
+        return _showMaterialMenu();
       default:
-        throw 'Not supposed to be invoked for $defaultTargetPlatform';
+        throw UnsupportedError(
+          'Not supposed to be invoked for $defaultTargetPlatform',
+        );
     }
   }
 
   Widget _showMaterialMenu() {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: [_widthSlider(), _heightSlider()],
+      children: [
+        _widthSlider(),
+        _heightSlider(),
+      ],
     );
   }
 
   Widget _showCupertinoMenu() {
-    return CupertinoActionSheet(actions: [
-      CupertinoActionSheetAction(
-        onPressed: () {},
-        child: _widthSlider(),
-      ),
-      CupertinoActionSheetAction(
-        onPressed: () {},
-        child: _heightSlider(),
-      )
-    ]);
+    return CupertinoActionSheet(
+      actions: [
+        CupertinoActionSheetAction(
+          onPressed: () {},
+          child: _widthSlider(),
+        ),
+        CupertinoActionSheetAction(
+          onPressed: () {},
+          child: _heightSlider(),
+        )
+      ],
+    );
   }
 
-  Widget _slider(
-      double value, double max, String label, ValueChanged<double> onChanged) {
+  Widget _slider({
+    required bool isWidth,
+    required ValueChanged<double> onChanged,
+  }) {
     return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Card(
-          child: Slider(
-            value: value,
-            max: max,
-            divisions: 1000,
-            label: label.i18n,
-            onChanged: (val) {
-              setState(() {
-                onChanged(val);
-                _resizeImage();
-              });
-            },
-          ),
-        ));
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Card(
+        child: Slider(
+          value: isWidth ? _width : _height,
+          max: isWidth ? widget.maxWidth : widget.maxHeight,
+          divisions: 1000,
+          // Might need to be changed
+          label: isWidth ? context.loc.width : context.loc.height,
+          onChanged: (val) {
+            setState(() {
+              onChanged(val);
+              _resizeImage();
+            });
+          },
+        ),
+      ),
+    );
   }
 
   Widget _heightSlider() {
-    return _slider(_height, widget.maxHeight, 'Height', (value) {
-      _height = value;
-    });
+    return _slider(
+      isWidth: false,
+      onChanged: (value) {
+        _height = value;
+      },
+    );
   }
 
   Widget _widthSlider() {
-    return _slider(_width, widget.maxWidth, 'Width', (value) {
-      _width = value;
-    });
+    return _slider(
+      isWidth: true,
+      onChanged: (value) {
+        _width = value;
+      },
+    );
   }
 
   bool _scheduled = false;

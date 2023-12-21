@@ -235,7 +235,7 @@ class EditorTextSelectionOverlay {
       return Container();
     }
 
-    if (isDesktop() && _selection.baseOffset == _selection.extentOffset) {
+    if (_selection.baseOffset == _selection.extentOffset) {
       return Container();
     }
 

@@ -86,15 +86,15 @@ class QuillToolbarToggleCheckListButtonState
   }
 
   double get iconSize {
-    final baseFontSize = baseButtonExtraOptions?.globalIconSize;
+    final baseFontSize = baseButtonExtraOptions?.iconSize;
     final iconSize = options.iconSize;
     return iconSize ?? baseFontSize ?? kDefaultIconSize;
   }
 
   double get iconButtonFactor {
-    final baseIconFactor = baseButtonExtraOptions?.globalIconButtonFactor;
+    final baseIconFactor = baseButtonExtraOptions?.iconButtonFactor;
     final iconButtonFactor = options.iconButtonFactor;
-    return iconButtonFactor ?? baseIconFactor ?? kIconButtonFactor;
+    return iconButtonFactor ?? baseIconFactor ?? kDefaultIconButtonFactor;
   }
 
   VoidCallback? get afterButtonPressed {
@@ -128,14 +128,7 @@ class QuillToolbarToggleCheckListButtonState
         options.childBuilder ?? baseButtonExtraOptions?.childBuilder;
     if (childBuilder != null) {
       return childBuilder(
-        QuillToolbarToggleCheckListButtonOptions(
-          afterButtonPressed: afterButtonPressed,
-          iconTheme: iconTheme,
-          iconSize: iconSize,
-          iconButtonFactor: iconButtonFactor,
-          tooltip: tooltip,
-          iconData: iconData,
-        ),
+        options,
         QuillToolbarToggleCheckListButtonExtraOptions(
           context: context,
           controller: controller,

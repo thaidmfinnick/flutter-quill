@@ -32,7 +32,6 @@ class QuillToolbarColorButton extends StatefulWidget {
   QuillToolbarColorButtonState createState() => QuillToolbarColorButtonState();
 }
 
-// TODO: This button shouldn't require anything to use it
 class QuillToolbarColorButtonState extends State<QuillToolbarColorButton> {
   late bool _isToggledColor;
   late bool _isToggledBackground;
@@ -105,15 +104,15 @@ class QuillToolbarColorButtonState extends State<QuillToolbarColorButton> {
   }
 
   double get iconSize {
-    final baseFontSize = baseButtonExtraOptions?.globalIconSize;
+    final baseFontSize = baseButtonExtraOptions?.iconSize;
     final iconSize = options.iconSize;
     return iconSize ?? baseFontSize ?? kDefaultIconSize;
   }
 
   double get iconButtonFactor {
-    final baseIconFactor = baseButtonExtraOptions?.globalIconButtonFactor;
+    final baseIconFactor = baseButtonExtraOptions?.iconButtonFactor;
     final iconButtonFactor = options.iconButtonFactor;
-    return iconButtonFactor ?? baseIconFactor ?? kIconButtonFactor;
+    return iconButtonFactor ?? baseIconFactor ?? kDefaultIconButtonFactor;
   }
 
   VoidCallback? get afterButtonPressed {
@@ -165,19 +164,8 @@ class QuillToolbarColorButtonState extends State<QuillToolbarColorButton> {
     final childBuilder =
         options.childBuilder ?? baseButtonExtraOptions?.childBuilder;
     if (childBuilder != null) {
-      // if the caller using Cupertino app he might need to wrap the builder
-      // with Material() widget
       return childBuilder(
-        QuillToolbarColorButtonOptions(
-          afterButtonPressed: afterButtonPressed,
-          dialogBarrierColor: options.dialogBarrierColor,
-          tooltip: tooltip,
-          iconTheme: iconTheme,
-          iconSize: iconSize,
-          iconData: iconData,
-          iconButtonFactor: iconButtonFactor,
-          customOnPressedCallback: options.customOnPressedCallback,
-        ),
+        options,
         QuillToolbarColorButtonExtraOptions(
           controller: controller,
           context: context,
@@ -206,7 +194,15 @@ class QuillToolbarColorButtonState extends State<QuillToolbarColorButton> {
     );
   }
 
-  void _changeColor(BuildContext context, Color color) {
+  void _changeColor(BuildContext context, Color? color) {
+    if (color == null) {
+      widget.controller.formatSelection(
+        widget.isBackground
+            ? const BackgroundAttribute(null)
+            : const ColorAttribute(null),
+      );
+      return;
+    }
     var hex = colorToHex(color);
     hex = '#$hex';
     widget.controller.formatSelection(

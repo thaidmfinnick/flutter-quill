@@ -25,16 +25,15 @@ class QuillToolbarSelectHeaderStyleDropdownButtonOptions
     super.childBuilder,
     super.iconTheme,
     super.tooltip,
-    this.iconSize,
-    this.iconButtonFactor,
+    super.iconSize,
+    super.iconButtonFactor,
     this.textStyle,
     super.iconData,
     this.attributes,
+    this.defaultDisplayText,
+    this.width,
   });
 
-  /// By default we will the toolbar axis from [QuillSimpleToolbarConfigurations]
-  final double? iconSize;
-  final double? iconButtonFactor;
   final TextStyle? textStyle;
 
   /// Header attributes, defaults to:
@@ -50,6 +49,9 @@ class QuillToolbarSelectHeaderStyleDropdownButtonOptions
   /// ]
   /// ```
   final List<Attribute<int?>>? attributes;
+  final double? width;
+
+  final String? defaultDisplayText;
 
   QuillToolbarSelectHeaderStyleDropdownButtonOptions copyWith({
     ValueChanged<String>? onSelected,
@@ -61,6 +63,8 @@ class QuillToolbarSelectHeaderStyleDropdownButtonOptions
     VoidCallback? afterButtonPressed,
     String? tooltip,
     QuillIconTheme? iconTheme,
+    String? defaultDisplayText,
+    double? width,
   }) {
     return QuillToolbarSelectHeaderStyleDropdownButtonOptions(
       attributes: attributes ?? this.attributes,
@@ -70,6 +74,8 @@ class QuillToolbarSelectHeaderStyleDropdownButtonOptions
       iconTheme: iconTheme ?? this.iconTheme,
       iconSize: iconSize ?? this.iconSize,
       iconButtonFactor: iconButtonFactor ?? this.iconButtonFactor,
+      defaultDisplayText: defaultDisplayText ?? this.defaultDisplayText,
+      width: width ?? this.width,
     );
   }
 }

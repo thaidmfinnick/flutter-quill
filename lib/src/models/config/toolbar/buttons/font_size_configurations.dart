@@ -33,8 +33,8 @@ class QuillToolbarFontSizeButtonExtraOptions
 class QuillToolbarFontSizeButtonOptions extends QuillToolbarBaseButtonOptions<
     QuillToolbarFontSizeButtonOptions, QuillToolbarFontSizeButtonExtraOptions> {
   const QuillToolbarFontSizeButtonOptions({
-    this.iconSize,
-    this.iconButtonFactor,
+    super.iconSize,
+    super.iconButtonFactor,
     this.rawItemsMap,
     this.onSelected,
     this.attribute = Attribute.size,
@@ -42,7 +42,7 @@ class QuillToolbarFontSizeButtonOptions extends QuillToolbarBaseButtonOptions<
     super.tooltip,
     this.padding,
     this.style,
-    this.width,
+    @Deprecated('No longer used') this.width,
     this.initialValue,
     this.labelOverflow = TextOverflow.visible,
     this.itemHeight,
@@ -50,10 +50,8 @@ class QuillToolbarFontSizeButtonOptions extends QuillToolbarBaseButtonOptions<
     this.defaultItemColor = Colors.red,
     super.childBuilder,
     this.shape,
+    this.defaultDisplayText,
   });
-
-  final double? iconSize;
-  final double? iconButtonFactor;
 
   final ButtonStyle? shape;
 
@@ -67,9 +65,12 @@ class QuillToolbarFontSizeButtonOptions extends QuillToolbarBaseButtonOptions<
   final double? width;
   final String? initialValue;
   final TextOverflow labelOverflow;
+  @Deprecated('No longer used')
   final double? itemHeight;
+  @Deprecated('No longer used')
   final EdgeInsets? itemPadding;
   final Color? defaultItemColor;
+  final String? defaultDisplayText;
 
   QuillToolbarFontSizeButtonOptions copyWith({
     double? iconSize,
@@ -92,6 +93,7 @@ class QuillToolbarFontSizeButtonOptions extends QuillToolbarBaseButtonOptions<
     VoidCallback? afterButtonPressed,
     String? tooltip,
     OutlinedBorder? shape,
+    String? defaultDisplayText,
   }) {
     return QuillToolbarFontSizeButtonOptions(
       iconSize: iconSize ?? this.iconSize,
@@ -101,14 +103,18 @@ class QuillToolbarFontSizeButtonOptions extends QuillToolbarBaseButtonOptions<
       attribute: attribute ?? this.attribute,
       padding: padding ?? this.padding,
       style: style ?? this.style,
+      // ignore: deprecated_member_use_from_same_package
       width: width ?? this.width,
       initialValue: initialValue ?? this.initialValue,
       labelOverflow: labelOverflow ?? this.labelOverflow,
+      // ignore: deprecated_member_use_from_same_package
       itemHeight: itemHeight ?? this.itemHeight,
+      // ignore: deprecated_member_use_from_same_package
       itemPadding: itemPadding ?? this.itemPadding,
       defaultItemColor: defaultItemColor ?? this.defaultItemColor,
       tooltip: tooltip ?? super.tooltip,
       afterButtonPressed: afterButtonPressed ?? super.afterButtonPressed,
+      defaultDisplayText: defaultDisplayText ?? this.defaultDisplayText,
     );
   }
 }

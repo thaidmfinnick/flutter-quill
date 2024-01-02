@@ -1,11 +1,9 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/translations.dart';
 
 import '../../../models/config/shared_configurations.dart';
-import '../../../models/config/toolbar/buttons/video.dart';
+import '../../../models/config/video/toolbar/video_configurations.dart';
 import '../../../services/image_picker/image_options.dart';
 import '../../others/image_video_utils.dart';
 import '../video.dart';
@@ -23,16 +21,15 @@ class QuillToolbarVideoButton extends StatelessWidget {
   final QuillToolbarVideoButtonOptions options;
 
   double _iconSize(BuildContext context) {
-    final baseFontSize = baseButtonExtraOptions(context)?.globalIconSize;
+    final baseFontSize = baseButtonExtraOptions(context)?.iconSize;
     final iconSize = options.iconSize;
     return iconSize ?? baseFontSize ?? kDefaultIconSize;
   }
 
   double _iconButtonFactor(BuildContext context) {
-    final baseIconFactor =
-        baseButtonExtraOptions(context)?.globalIconButtonFactor;
+    final baseIconFactor = baseButtonExtraOptions(context)?.iconButtonFactor;
     final iconButtonFactor = options.iconButtonFactor;
-    return iconButtonFactor ?? baseIconFactor ?? kIconButtonFactor;
+    return iconButtonFactor ?? baseIconFactor ?? kDefaultIconButtonFactor;
   }
 
   VoidCallback? _afterButtonPressed(BuildContext context) {
@@ -141,7 +138,8 @@ class QuillToolbarVideoButton extends StatelessWidget {
         (await imagePickerService.pickVideo(source: ImageSource.gallery))?.path,
       InsertVideoSource.camera =>
         (await imagePickerService.pickVideo(source: ImageSource.camera))?.path,
-      InsertVideoSource.link => await _typeLink(context),
+      InsertVideoSource.link =>
+        context.mounted ? await _typeLink(context) : null,
     };
     if (videoUrl == null) {
       return;

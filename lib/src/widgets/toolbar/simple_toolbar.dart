@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../translations.dart';
 import '../../extensions/quill_configurations_ext.dart';
 import '../../models/config/toolbar/toolbar_configurations.dart';
 import '../../models/documents/attribute.dart';
@@ -54,8 +53,7 @@ class QuillSimpleToolbar extends StatelessWidget
       final toolbarConfigurations =
           context.requireQuillSimpleToolbarConfigurations;
 
-      final globalIconSize =
-          toolbarConfigurations.buttonOptions.base.globalIconSize;
+      final globalIconSize = toolbarConfigurations.buttonOptions.base.iconSize;
 
       final axis = toolbarConfigurations.axis;
       final globalController = configurations.controller;
@@ -77,13 +75,11 @@ class QuillSimpleToolbar extends StatelessWidget
           QuillToolbarFontFamilyButton(
             options: toolbarConfigurations.buttonOptions.fontFamily,
             controller: globalController,
-            defaultDispalyText: context.loc.font,
           ),
         if (configurations.showFontSize)
           QuillToolbarFontSizeButton(
             options: toolbarConfigurations.buttonOptions.fontSize,
             controller: globalController,
-            defaultDisplayText: context.loc.fontSize,
           ),
         if (configurations.showBoldButton)
           QuillToolbarToggleStyleButton(
@@ -154,7 +150,7 @@ class QuillSimpleToolbar extends StatelessWidget
           for (final builder in theEmbedButtons)
             builder(
                 globalController,
-                globalIconSize,
+                globalIconSize ?? kDefaultIconSize,
                 context.quillToolbarBaseButtonOptions?.iconTheme,
                 configurations.dialogTheme),
         if (configurations.showDividers &&
@@ -172,11 +168,13 @@ class QuillSimpleToolbar extends StatelessWidget
         if (configurations.showAlignmentButtons)
           QuillToolbarSelectAlignmentButtons(
             controller: globalController,
-            options: toolbarConfigurations.buttonOptions.selectAlignmentButtons,
-            showLeftAlignment: configurations.showLeftAlignment,
-            showCenterAlignment: configurations.showCenterAlignment,
-            showRightAlignment: configurations.showRightAlignment,
-            showJustifyAlignment: configurations.showJustifyAlignment,
+            options: toolbarConfigurations.buttonOptions.selectAlignmentButtons
+                .copyWith(
+              showLeftAlignment: configurations.showLeftAlignment,
+              showCenterAlignment: configurations.showCenterAlignment,
+              showRightAlignment: configurations.showRightAlignment,
+              showJustifyAlignment: configurations.showJustifyAlignment,
+            ),
           ),
         if (configurations.showDirection)
           QuillToolbarToggleStyleButton(
@@ -368,8 +366,8 @@ class QuillSimpleToolbar extends StatelessWidget
 
   @override
   Size get preferredSize => configurations.axis == Axis.horizontal
-      ? const Size.fromHeight(defaultToolbarSize)
-      : const Size.fromWidth(defaultToolbarSize);
+      ? const Size.fromHeight(kDefaultToolbarSize)
+      : const Size.fromWidth(kDefaultToolbarSize);
 }
 
 /// The divider which is used for separation of buttons in the toolbar.

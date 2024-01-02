@@ -11,7 +11,8 @@ class QuillToolbarSearchButtonExtraOptions
   });
 }
 
-class QuillToolbarSearchButtonOptions extends QuillToolbarBaseButtonOptions {
+class QuillToolbarSearchButtonOptions extends QuillToolbarBaseButtonOptions<
+    QuillToolbarBaseButtonOptions, QuillToolbarSearchButtonExtraOptions> {
   const QuillToolbarSearchButtonOptions({
     super.iconData,
     super.childBuilder,
@@ -19,16 +20,14 @@ class QuillToolbarSearchButtonOptions extends QuillToolbarBaseButtonOptions {
     super.afterButtonPressed,
     super.iconTheme,
     this.dialogTheme,
-    this.iconSize,
-    this.iconButtonFactor,
+    super.iconSize,
+    super.iconButtonFactor,
     this.dialogBarrierColor,
     this.fillColor,
     this.customOnPressedCallback,
   });
 
   final QuillDialogTheme? dialogTheme;
-  final double? iconSize;
-  final double? iconButtonFactor;
 
   /// By default will be [dialogBarrierColor] from [QuillSharedConfigurations]
   final Color? dialogBarrierColor;

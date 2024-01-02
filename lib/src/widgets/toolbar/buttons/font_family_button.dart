@@ -11,7 +11,8 @@ import '../base_toolbar.dart';
 class QuillToolbarFontFamilyButton extends StatefulWidget {
   QuillToolbarFontFamilyButton({
     required this.controller,
-    required this.defaultDispalyText,
+    @Deprecated('Please use the default display text from the options')
+    this.defaultDisplayText,
     this.options = const QuillToolbarFontFamilyButtonOptions(),
     super.key,
   })  : assert(options.rawItemsMap?.isNotEmpty ?? (true)),
@@ -21,7 +22,7 @@ class QuillToolbarFontFamilyButton extends StatefulWidget {
 
   final QuillToolbarFontFamilyButtonOptions options;
 
-  final String defaultDispalyText;
+  final String? defaultDisplayText;
 
   /// Since we can't get the state from the instace of the widget for comparing
   /// in [didUpdateWidget] then we will have to store reference here
@@ -40,27 +41,25 @@ class QuillToolbarFontFamilyButtonState
     return widget.options;
   }
 
-  // Style get _selectionStyle => controller.getSelectionStyle();
-
   @override
   void initState() {
     super.initState();
     _initState();
   }
 
-  void _initState() {
+  void _initState() {}
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _currentValue = _defaultDisplayText;
-    // controller.addListener(_didChangeEditingValue);
   }
 
-  // @override
-  // void dispose() {
-  //   controller.removeListener(_didChangeEditingValue);
-  //   super.dispose();
-  // }
-
   String get _defaultDisplayText {
-    return options.initialValue ?? widget.defaultDispalyText;
+    return options.initialValue ??
+        widget.options.defaultDisplayText ??
+        widget.defaultDisplayText ??
+        context.loc.font;
   }
 
   // @override
@@ -116,7 +115,7 @@ class QuillToolbarFontFamilyButtonState
   }
 
   double get iconSize {
-    final baseFontSize = context.quillToolbarBaseButtonOptions?.globalIconSize;
+    final baseFontSize = context.quillToolbarBaseButtonOptions?.iconSize;
     final iconSize = options.iconSize;
     return iconSize ?? baseFontSize ?? kDefaultIconSize;
   }
@@ -138,9 +137,15 @@ class QuillToolbarFontFamilyButtonState
   }
 
   void _onPressed() {
-    _showMenu();
+    if (_menuController.isOpen) {
+      _menuController.close();
+    } else {
+      _menuController.open();
+    }
     options.afterButtonPressed?.call();
   }
+
+  final _menuController = MenuController();
 
   @override
   Widget build(BuildContext context) {
@@ -149,13 +154,7 @@ class QuillToolbarFontFamilyButtonState
         options.childBuilder ?? baseButtonConfigurations?.childBuilder;
     if (childBuilder != null) {
       return childBuilder(
-        options.copyWith(
-          iconSize: iconSize,
-          rawItemsMap: rawItemsMap,
-          iconTheme: iconTheme,
-          tooltip: tooltip,
-          afterButtonPressed: afterButtonPressed,
-        ),
+        options,
         QuillToolbarFontFamilyButtonExtraOptions(
           currentValue: _currentValue,
           defaultDisplayText: _defaultDisplayText,
@@ -165,22 +164,64 @@ class QuillToolbarFontFamilyButtonState
         ),
       );
     }
-    return ConstrainedBox(
-      constraints: BoxConstraints.tightFor(
-        height: iconSize * 1.81,
-        width: options.width,
-      ),
-      child: UtilityWidgets.maybeWidget(
-        enabled: tooltip.isNotEmpty || options.overrideTooltipByFontFamily,
-        wrapper: (child) {
-          var effectiveTooltip = tooltip;
-          if (options.overrideTooltipByFontFamily) {
-            effectiveTooltip = effectiveTooltip.isNotEmpty
-                ? '$effectiveTooltip: $_currentValue'
-                : '${context.loc.font}: $_currentValue';
-          }
-          return Tooltip(message: effectiveTooltip, child: child);
-        },
+    return UtilityWidgets.maybeWidget(
+      enabled: tooltip.isNotEmpty || options.overrideTooltipByFontFamily,
+      wrapper: (child) {
+        var effectiveTooltip = tooltip;
+        if (options.overrideTooltipByFontFamily) {
+          effectiveTooltip = effectiveTooltip.isNotEmpty
+              ? '$effectiveTooltip: $_currentValue'
+              : '${context.loc.font}: $_currentValue';
+        }
+        return Tooltip(message: effectiveTooltip, child: child);
+      },
+      child: MenuAnchor(
+        controller: _menuController,
+        menuChildren: [
+          for (final MapEntry<String, String> fontFamily in rawItemsMap.entries)
+            MenuItemButton(
+              key: ValueKey(fontFamily.key),
+              // value: fontFamily.value,
+              // height: options.itemHeight ?? kMinInteractiveDimension,
+              // padding: options.itemPadding,
+              onPressed: () {
+                final newValue = fontFamily.value;
+                final keyName = _getKeyName(newValue);
+                setState(() {
+                  if (keyName != 'Clear') {
+                    _currentValue = keyName ?? _defaultDisplayText;
+                  } else {
+                    _currentValue = _defaultDisplayText;
+                  }
+                  if (keyName != null) {
+                    controller.formatSelection(
+                      Attribute.fromKeyValue(
+                        Attribute.font.key,
+                        newValue == 'Clear' ? null : newValue,
+                      ),
+                    );
+                    options.onSelected?.call(newValue);
+                  }
+                });
+
+                if (fontFamily.value == 'Clear') {
+                  controller.selectFontFamily(null);
+                  return;
+                }
+                controller.selectFontFamily(fontFamily);
+              },
+              child: Text(
+                fontFamily.key.toString(),
+                style: TextStyle(
+                  fontFamily:
+                      options.renderFontFamilies ? fontFamily.value : null,
+                  color: fontFamily.value == 'Clear'
+                      ? options.defaultItemColor
+                      : null,
+                ),
+              ),
+            ),
+        ],
         child: Builder(
           builder: (context) {
             final isMaterial3 = Theme.of(context).useMaterial3;
@@ -209,76 +250,6 @@ class QuillToolbarFontFamilyButtonState
     );
   }
 
-  Future<void> _showMenu() async {
-    final popupMenuTheme = PopupMenuTheme.of(context);
-    final button = context.findRenderObject() as RenderBox;
-    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-    final position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        button.localToGlobal(Offset.zero, ancestor: overlay),
-        button.localToGlobal(button.size.bottomLeft(Offset.zero),
-            ancestor: overlay),
-      ),
-      Offset.zero & overlay.size,
-    );
-    final newValue = await showMenu<String>(
-      context: context,
-      elevation: 4,
-      items: [
-        for (final MapEntry<String, String> fontFamily in rawItemsMap.entries)
-          PopupMenuItem<String>(
-            key: ValueKey(fontFamily.key),
-            value: fontFamily.value,
-            height: options.itemHeight ?? kMinInteractiveDimension,
-            padding: options.itemPadding,
-            onTap: () {
-              if (fontFamily.value == 'Clear') {
-                controller.selectFontFamily(null);
-                return;
-              }
-              controller.selectFontFamily(fontFamily.value);
-            },
-            child: Text(
-              fontFamily.key.toString(),
-              style: TextStyle(
-                fontFamily:
-                    options.renderFontFamilies ? fontFamily.value : null,
-                color: fontFamily.value == 'Clear'
-                    ? options.defaultItemColor
-                    : null,
-              ),
-            ),
-          ),
-      ],
-      position: position,
-      shape: popupMenuTheme.shape,
-      color: popupMenuTheme.color,
-    );
-    if (!mounted) {
-      return;
-    }
-    if (newValue == null) {
-      return;
-    }
-    final keyName = _getKeyName(newValue);
-    setState(() {
-      if (keyName != 'Clear') {
-        _currentValue = keyName ?? _defaultDisplayText;
-      } else {
-        _currentValue = _defaultDisplayText;
-      }
-      if (keyName != null) {
-        controller.formatSelection(
-          Attribute.fromKeyValue(
-            Attribute.font.key,
-            newValue == 'Clear' ? null : newValue,
-          ),
-        );
-        options.onSelected?.call(newValue);
-      }
-    });
-  }
-
   Widget _buildContent(BuildContext context) {
     final hasFinalWidth = options.width != null;
     return Padding(
@@ -291,7 +262,7 @@ class QuillToolbarFontFamilyButtonState
             enabled: hasFinalWidth,
             wrapper: (child) => Expanded(child: child),
             child: Text(
-              widget.controller.selectedFontFamily ?? _currentValue,
+              widget.controller.selectedFontFamily?.key ?? _currentValue,
               maxLines: 1,
               overflow: options.labelOverflow,
               style: options.style ??

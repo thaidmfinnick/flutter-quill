@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide OptionalSize;
 import 'package:flutter_quill/translations.dart';
 
-import '../../../models/config/editor/image/image.dart';
+import '../../../models/config/image/editor/image_configurations.dart';
 import '../../../models/config/shared_configurations.dart';
 import '../../../utils/element_utils/element_utils.dart';
 import '../../widgets/image.dart';
@@ -56,20 +56,26 @@ class QuillEditorImageEmbedBuilder extends EmbedBuilder {
         QuillSharedExtensionsConfigurations.get(context: context)
             .imageSaverService;
     return GestureDetector(
-      onTap: configurations.onImageClicked ??
-          () => showDialog(
-                context: context,
-                builder: (_) => FlutterQuillLocalizationsWidget(
-                  child: ImageOptionsMenu(
-                    controller: controller,
-                    configurations: configurations,
-                    imageSource: imageSource,
-                    imageSize: imageSize,
-                    isReadOnly: readOnly,
-                    imageSaverService: imageSaverService,
-                  ),
-                ),
-              ),
+      onTap: () {
+        final onImageClicked = configurations.onImageClicked;
+        if (onImageClicked != null) {
+          onImageClicked(imageSource);
+          return;
+        }
+        showDialog(
+          context: context,
+          builder: (_) => FlutterQuillLocalizationsWidget(
+            child: ImageOptionsMenu(
+              controller: controller,
+              configurations: configurations,
+              imageSource: imageSource,
+              imageSize: imageSize,
+              isReadOnly: readOnly,
+              imageSaverService: imageSaverService,
+            ),
+          ),
+        );
+      },
       child: Builder(
         builder: (context) {
           if (margin != null) {

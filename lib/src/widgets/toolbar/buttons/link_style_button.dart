@@ -63,15 +63,15 @@ class QuillToolbarLinkStyleButtonState
   }
 
   double get iconSize {
-    final baseFontSize = baseButtonExtraOptions?.globalIconSize;
+    final baseFontSize = baseButtonExtraOptions?.iconSize;
     final iconSize = options.iconSize;
     return iconSize ?? baseFontSize ?? kDefaultIconSize;
   }
 
   double get iconButtonFactor {
-    final baseIconFactor = baseButtonExtraOptions?.globalIconButtonFactor;
+    final baseIconFactor = baseButtonExtraOptions?.iconButtonFactor;
     final iconButtonFactor = options.iconButtonFactor;
-    return iconButtonFactor ?? baseIconFactor ?? kIconButtonFactor;
+    return iconButtonFactor ?? baseIconFactor ?? kDefaultIconButtonFactor;
   }
 
   VoidCallback? get afterButtonPressed {
@@ -115,18 +115,7 @@ class QuillToolbarLinkStyleButtonState
         options.childBuilder ?? baseButtonExtraOptions?.childBuilder;
     if (childBuilder != null) {
       return childBuilder(
-        QuillToolbarLinkStyleButtonOptions(
-          afterButtonPressed: afterButtonPressed,
-          dialogBarrierColor: dialogBarrierColor,
-          dialogTheme: options.dialogTheme,
-          iconData: iconData,
-          iconSize: iconSize,
-          iconButtonFactor: iconButtonFactor,
-          tooltip: tooltip,
-          linkDialogAction: options.linkDialogAction,
-          linkRegExp: linkRegExp,
-          iconTheme: iconTheme,
-        ),
+        options,
         QuillToolbarLinkStyleButtonExtraOptions(
           context: context,
           controller: controller,

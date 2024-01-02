@@ -21,16 +21,16 @@ body:
       description: Please tell us which version of `flutter_quill` that you are using.
       placeholder: For example 9.0.0
     validations:
-      required: true
-  - type: textarea
-    attributes:
-      label: Other Flutter Quill packages versions
-      description: If you are using any other packages like `flutter_quill_extensions` or `flutter_quill_test` please mention the versions here
-      placeholder: |
-        flutter_quill_extensions: ^0.6.10
-        flutter_quill_test: ^0.0.5
-    validations:
       required: false
+  # - type: textarea
+  #   attributes:
+  #     label: Other Flutter Quill packages versions
+  #     description: If you are using any other packages like `flutter_quill_extensions` or `flutter_quill_test` please mention the versions here
+  #     placeholder: |
+  #       flutter_quill_extensions: ^0.6.10
+  #       flutter_quill_test: ^0.0.5
+  #   validations:
+  #     required: false
   - type: textarea
     attributes:
       label: Steps to reproduce
@@ -60,13 +60,8 @@ body:
         Please create a minimal reproducible sample that shows the problem
         and attach it below between the lines with the backticks.
 
-        To create it, use the `flutter create bug` command and update the `main.dart` file.
-
         Alternatively, you can use https://dartpad.dev/ or create a public GitHub
         repository to share your sample.
-
-        Note: Please do not upload screenshots of text. Instead, use code blocks
-        or the above mentioned ways to upload your code sample.
       value: |
         <details><summary>Code sample</summary>
 

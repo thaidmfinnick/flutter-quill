@@ -21,11 +21,13 @@ import 'quill_localizations_id.dart';
 import 'quill_localizations_it.dart';
 import 'quill_localizations_ja.dart';
 import 'quill_localizations_ko.dart';
+import 'quill_localizations_ku.dart';
 import 'quill_localizations_ms.dart';
 import 'quill_localizations_nl.dart';
 import 'quill_localizations_no.dart';
 import 'quill_localizations_pl.dart';
 import 'quill_localizations_pt.dart';
+import 'quill_localizations_ro.dart';
 import 'quill_localizations_ru.dart';
 import 'quill_localizations_sr.dart';
 import 'quill_localizations_sw.dart';
@@ -138,12 +140,16 @@ abstract class FlutterQuillLocalizations {
     Locale('it'),
     Locale('ja'),
     Locale('ko'),
+    Locale('ku'),
+    Locale('ku', 'CKB'),
     Locale('ms'),
     Locale('nl'),
     Locale('no'),
     Locale('pl'),
     Locale('pt'),
     Locale('pt', 'BR'),
+    Locale('ro'),
+    Locale('ro', 'RO'),
     Locale('ru'),
     Locale('sr'),
     Locale('sw'),
@@ -708,11 +714,13 @@ class _FlutterQuillLocalizationsDelegate
         'it',
         'ja',
         'ko',
+        'ku',
         'ms',
         'nl',
         'no',
         'pl',
         'pt',
+        'ro',
         'ru',
         'sr',
         'sw',
@@ -739,11 +747,27 @@ FlutterQuillLocalizations lookupFlutterQuillLocalizations(Locale locale) {
         }
         break;
       }
+    case 'ku':
+      {
+        switch (locale.countryCode) {
+          case 'CKB':
+            return FlutterQuillLocalizationsKuCkb();
+        }
+        break;
+      }
     case 'pt':
       {
         switch (locale.countryCode) {
           case 'BR':
             return FlutterQuillLocalizationsPtBr();
+        }
+        break;
+      }
+    case 'ro':
+      {
+        switch (locale.countryCode) {
+          case 'RO':
+            return FlutterQuillLocalizationsRoRo();
         }
         break;
       }
@@ -793,6 +817,8 @@ FlutterQuillLocalizations lookupFlutterQuillLocalizations(Locale locale) {
       return FlutterQuillLocalizationsJa();
     case 'ko':
       return FlutterQuillLocalizationsKo();
+    case 'ku':
+      return FlutterQuillLocalizationsKu();
     case 'ms':
       return FlutterQuillLocalizationsMs();
     case 'nl':
@@ -803,6 +829,8 @@ FlutterQuillLocalizations lookupFlutterQuillLocalizations(Locale locale) {
       return FlutterQuillLocalizationsPl();
     case 'pt':
       return FlutterQuillLocalizationsPt();
+    case 'ro':
+      return FlutterQuillLocalizationsRo();
     case 'ru':
       return FlutterQuillLocalizationsRu();
     case 'sr':

@@ -13,7 +13,8 @@ import '../base_toolbar.dart';
 class QuillToolbarFontSizeButton extends StatefulWidget {
   QuillToolbarFontSizeButton({
     required this.controller,
-    required this.defaultDisplayText,
+    @Deprecated('Please use the default display text from the options')
+    this.defaultDisplayText,
     this.options = const QuillToolbarFontSizeButtonOptions(),
     super.key,
   })  : assert(options.rawItemsMap?.isNotEmpty ?? true),
@@ -22,7 +23,7 @@ class QuillToolbarFontSizeButton extends StatefulWidget {
 
   final QuillToolbarFontSizeButtonOptions options;
 
-  final String defaultDisplayText;
+  final String? defaultDisplayText;
 
   /// Since we can't get the state from the instace of the widget for comparing
   /// in [didUpdateWidget] then we will have to store reference here
@@ -35,6 +36,7 @@ class QuillToolbarFontSizeButton extends StatefulWidget {
 
 class QuillToolbarFontSizeButtonState
     extends State<QuillToolbarFontSizeButton> {
+  final _menuController = MenuController();
   String _currentValue = '';
 
   QuillToolbarFontSizeButtonOptions get options {
@@ -64,12 +66,15 @@ class QuillToolbarFontSizeButtonState
   }
 
   String get _defaultDisplayText {
-    return options.initialValue ?? widget.defaultDisplayText;
+    return options.initialValue ??
+        widget.options.defaultDisplayText ??
+        widget.defaultDisplayText ??
+        context.loc.fontSize;
   }
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _currentValue = _defaultDisplayText;
   }
 
@@ -92,16 +97,16 @@ class QuillToolbarFontSizeButtonState
   }
 
   double get iconSize {
-    final baseFontSize = context.quillToolbarBaseButtonOptions?.globalIconSize;
+    final baseFontSize = context.quillToolbarBaseButtonOptions?.iconSize;
     final iconSize = options.iconSize;
     return iconSize ?? baseFontSize ?? kDefaultIconSize;
   }
 
   double get iconButtonFactor {
     final baseIconFactor =
-        context.quillToolbarBaseButtonOptions?.globalIconButtonFactor;
+        context.quillToolbarBaseButtonOptions?.iconButtonFactor;
     final iconButtonFactor = options.iconButtonFactor;
-    return iconButtonFactor ?? baseIconFactor ?? kIconButtonFactor;
+    return iconButtonFactor ?? baseIconFactor ?? kDefaultIconButtonFactor;
   }
 
   VoidCallback? get afterButtonPressed {
@@ -120,8 +125,12 @@ class QuillToolbarFontSizeButtonState
         context.loc.fontSize;
   }
 
-  void _onPressed() {
-    _showMenu();
+  void _onDropdownButtonPressed() {
+    if (_menuController.isOpen) {
+      _menuController.close();
+    } else {
+      _menuController.open();
+    }
     afterButtonPressed?.call();
   }
 
@@ -132,32 +141,62 @@ class QuillToolbarFontSizeButtonState
         options.childBuilder ?? baseButtonConfigurations?.childBuilder;
     if (childBuilder != null) {
       return childBuilder(
-        options.copyWith(
-          tooltip: tooltip,
-          iconSize: iconSize,
-          iconButtonFactor: iconButtonFactor,
-          afterButtonPressed: afterButtonPressed,
-        ),
+        options,
         QuillToolbarFontSizeButtonExtraOptions(
           controller: controller,
           currentValue: _currentValue,
           defaultDisplayText: _defaultDisplayText,
           context: context,
-          onPressed: _onPressed,
+          onPressed: _onDropdownButtonPressed,
         ),
       );
     }
-    return ConstrainedBox(
-      constraints: BoxConstraints.tightFor(
-        height: iconSize * 1.81,
-        width: options.width,
-      ),
+    return MenuAnchor(
+      controller: _menuController,
+      menuChildren: rawItemsMap.entries.map((fontSize) {
+        return MenuItemButton(
+          key: ValueKey(fontSize.key),
+          onPressed: () {
+            final newValue = fontSize.value;
+
+            final keyName = _getKeyName(newValue);
+            setState(() {
+              if (keyName != context.loc.clear) {
+                _currentValue = keyName ?? _defaultDisplayText;
+              } else {
+                _currentValue = _defaultDisplayText;
+              }
+              if (keyName != null) {
+                controller.formatSelection(
+                  Attribute.fromKeyValue(
+                    Attribute.size.key,
+                    newValue == '0' ? null : getFontSize(newValue),
+                  ),
+                );
+                options.onSelected?.call(newValue);
+              }
+            });
+
+            if (fontSize.value == '0') {
+              controller.selectFontSize(null);
+              return;
+            }
+            controller.selectFontSize(fontSize);
+          },
+          child: Text(
+            fontSize.key.toString(),
+            style: TextStyle(
+              color: fontSize.value == '0' ? options.defaultItemColor : null,
+            ),
+          ),
+        );
+      }).toList(),
       child: Builder(
         builder: (context) {
           final isMaterial3 = Theme.of(context).useMaterial3;
           if (!isMaterial3) {
             return RawMaterialButton(
-              onPressed: _onPressed,
+              onPressed: _onDropdownButtonPressed,
               child: _buildContent(context),
             );
           }
@@ -172,76 +211,12 @@ class QuillToolbarFontSizeButtonState
                 visualDensity: VisualDensity.compact,
               ),
             ),
-            onPressed: _onPressed,
+            onPressed: _onDropdownButtonPressed,
             icon: _buildContent(context),
           );
         },
       ),
     );
-  }
-
-  Future<void> _showMenu() async {
-    final popupMenuTheme = PopupMenuTheme.of(context);
-    final button = context.findRenderObject() as RenderBox;
-    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-    final position = RelativeRect.fromRect(
-      Rect.fromPoints(
-        button.localToGlobal(Offset.zero, ancestor: overlay),
-        button.localToGlobal(button.size.bottomLeft(Offset.zero),
-            ancestor: overlay),
-      ),
-      Offset.zero & overlay.size,
-    );
-    final newValue = await showMenu<String>(
-      context: context,
-      elevation: 4,
-      items: [
-        for (final MapEntry<String, String> fontSize in rawItemsMap.entries)
-          PopupMenuItem<String>(
-            key: ValueKey(fontSize.key),
-            value: fontSize.value,
-            height: options.itemHeight ?? kMinInteractiveDimension,
-            padding: options.itemPadding,
-            onTap: () {
-              if (fontSize.value == '0') {
-                controller.selectFontSize(null);
-                return;
-              }
-              controller.selectFontSize(fontSize.value);
-            },
-            child: Text(
-              fontSize.key.toString(),
-              style: TextStyle(
-                color: fontSize.value == '0' ? options.defaultItemColor : null,
-              ),
-            ),
-          ),
-      ],
-      position: position,
-      shape: popupMenuTheme.shape,
-      color: popupMenuTheme.color,
-    );
-    if (!mounted) return;
-    if (newValue == null) {
-      return;
-    }
-    final keyName = _getKeyName(newValue);
-    setState(() {
-      if (keyName != 'Clear') {
-        _currentValue = keyName ?? _defaultDisplayText;
-      } else {
-        _currentValue = _defaultDisplayText;
-      }
-      if (keyName != null) {
-        controller.formatSelection(
-          Attribute.fromKeyValue(
-            Attribute.size.key,
-            newValue == '0' ? null : getFontSize(newValue),
-          ),
-        );
-        options.onSelected?.call(newValue);
-      }
-    });
   }
 
   Widget _buildContent(BuildContext context) {
@@ -256,15 +231,13 @@ class QuillToolbarFontSizeButtonState
             enabled: hasFinalWidth,
             wrapper: (child) => Expanded(child: child),
             child: Text(
-              getLabel(widget.controller.selectedFontSize) ??
+              getLabel(widget.controller.selectedFontSize?.key) ??
                   getLabel(_currentValue) ??
                   '',
               overflow: options.labelOverflow,
               style: options.style ??
                   TextStyle(
                     fontSize: iconSize / 1.15,
-                    // color: iconTheme?.iconUnselectedFillColor ??
-                    //     theme.iconTheme.color,
                   ),
             ),
           ),
@@ -272,7 +245,6 @@ class QuillToolbarFontSizeButtonState
           Icon(
             Icons.arrow_drop_down,
             size: iconSize / 1.15,
-            // color: iconTheme?.iconUnselectedFillColor ?? theme.iconTheme.color,
           )
         ],
       ),

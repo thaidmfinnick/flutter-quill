@@ -4,7 +4,8 @@ import 'package:flutter/widgets.dart' show BuildContext, IconData, Widget;
 
 import '../../../../flutter_quill.dart' show QuillController;
 import '../../themes/quill_icon_theme.dart' show QuillIconTheme;
-import '../quill_configurations.dart' show kDefaultIconSize, kIconButtonFactor;
+import '../quill_configurations.dart'
+    show kDefaultIconSize, kDefaultIconButtonFactor;
 
 class QuillToolbarBaseButtonExtraOptionsIsToggled extends Equatable {
   const QuillToolbarBaseButtonExtraOptionsIsToggled(this.isToggled);
@@ -23,8 +24,6 @@ class QuillToolbarBaseButtonExtraOptions extends Equatable {
     required this.onPressed,
   });
 
-  /// if you need the not null controller for some usage in the [childBuilder]
-  /// then please use this instead of the one in the [options]
   final QuillController controller;
 
   /// if the child builder you must use this when the widget tapped or pressed
@@ -45,8 +44,13 @@ class QuillToolbarBaseButtonExtraOptions extends Equatable {
 class QuillToolbarBaseButtonOptions<T, I> extends Equatable {
   const QuillToolbarBaseButtonOptions({
     this.iconData,
+    @Deprecated('This will be removed in future releases, use iconSize instead')
     this.globalIconSize = kDefaultIconSize,
-    this.globalIconButtonFactor = kIconButtonFactor,
+    this.iconSize,
+    this.iconButtonFactor,
+    @Deprecated(
+        'This will be removed in future releases, use iconButtonFactor instead')
+    this.globalIconButtonFactor = kDefaultIconButtonFactor,
     this.afterButtonPressed,
     this.tooltip,
     this.iconTheme,
@@ -61,11 +65,21 @@ class QuillToolbarBaseButtonOptions<T, I> extends Equatable {
   /// To change the the icon size pass a different value, by default will be
   /// [kDefaultIconSize].
   /// this will be used for all the buttons but you can override this
+  @Deprecated('This will be removed in future releases, use iconSize instead')
   final double globalIconSize;
 
+  /// To change the the icon size pass a different value, by default will be
+  /// [kDefaultIconSize].
+  /// this will be used for all the buttons but you can override this
+  final double? iconSize;
+
   /// The factor of how much larger the button is in relation to the icon,
-  /// by default it will be [kIconButtonFactor].
+  /// by default it will be [kDefaultIconButtonFactor].
+  @Deprecated(
+      'This will be removed in future releases, use iconButtonFactor instead')
   final double globalIconButtonFactor;
+
+  final double? iconButtonFactor;
 
   /// To do extra logic after pressing the button
   final VoidCallback? afterButtonPressed;
@@ -82,7 +96,8 @@ class QuillToolbarBaseButtonOptions<T, I> extends Equatable {
   @override
   List<Object?> get props => [
         iconData,
-        globalIconSize,
+        iconSize,
+        iconButtonFactor,
         afterButtonPressed,
         tooltip,
         iconTheme,

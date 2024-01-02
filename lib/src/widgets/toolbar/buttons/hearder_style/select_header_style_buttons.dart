@@ -55,15 +55,15 @@ class QuillToolbarSelectHeaderStyleButtonsState
   }
 
   double get iconSize {
-    final baseFontSize = baseButtonExtraOptions?.globalIconSize;
+    final baseFontSize = baseButtonExtraOptions?.iconSize;
     final iconSize = options.iconSize;
     return iconSize ?? baseFontSize ?? kDefaultIconSize;
   }
 
   double get iconButtonFactor {
-    final baseIconFactor = baseButtonExtraOptions?.globalIconButtonFactor;
+    final baseIconFactor = baseButtonExtraOptions?.iconButtonFactor;
     final iconButtonFactor = options.iconButtonFactor;
-    return iconButtonFactor ?? baseIconFactor ?? kIconButtonFactor;
+    return iconButtonFactor ?? baseIconFactor ?? kDefaultIconButtonFactor;
   }
 
   VoidCallback? get afterButtonPressed {
@@ -89,8 +89,7 @@ class QuillToolbarSelectHeaderStyleButtonsState
     return options.axis ??
         context.quillSimpleToolbarConfigurations?.axis ??
         context.quillToolbarConfigurations?.axis ??
-        (throw ArgumentError(
-            'There is no default value for the Axis of the toolbar'));
+        Axis.horizontal;
   }
 
   void _sharedOnPressed(Attribute attribute) {
@@ -130,15 +129,7 @@ class QuillToolbarSelectHeaderStyleButtonsState
     final children = _attrbuites.map((attribute) {
       if (childBuilder != null) {
         return childBuilder(
-          QuillToolbarSelectHeaderStyleButtonsOptions(
-            afterButtonPressed: afterButtonPressed,
-            attributes: _attrbuites,
-            axis: axis,
-            iconSize: iconSize,
-            iconButtonFactor: iconButtonFactor,
-            iconTheme: iconTheme,
-            tooltip: tooltip,
-          ),
+          options,
           QuillToolbarSelectHeaderStyleButtonsExtraOptions(
             controller: controller,
             context: context,
@@ -146,39 +137,24 @@ class QuillToolbarSelectHeaderStyleButtonsState
           ),
         );
       }
-      // final theme = Theme.of(context);
+
       final isSelected = _selectedAttribute == attribute;
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: !kIsWeb ? 1.0 : 5.0),
-        child: ConstrainedBox(
-          constraints: BoxConstraints.tightFor(
-            width: iconSize * iconButtonFactor,
-            height: iconSize * iconButtonFactor,
-          ),
-          child: QuillToolbarIconButton(
-            tooltip: tooltip,
-            iconTheme: iconTheme?.copyWith(
-              iconButtonSelectedData: const IconButtonData(
-                visualDensity: VisualDensity.compact,
-              ),
-              iconButtonUnselectedData: const IconButtonData(
-                visualDensity: VisualDensity.compact,
-              ),
-            ),
-            isSelected: isSelected,
-            onPressed: () => _sharedOnPressed(attribute),
-            icon: Text(
-              _valueToText[attribute] ??
-                  (throw ArgumentError.notNull(
-                    'attrbuite',
-                  )),
-              style: style.copyWith(
-                  // color: isSelected
-                  //     ? (iconTheme?.iconSelectedFillColor ??
-                  //         theme.primaryIconTheme.color)
-                  //     : (iconTheme?.iconUnselectedFillColor ??
-                  //         theme.iconTheme.color),
-                  ),
+        child: QuillToolbarIconButton(
+          tooltip: tooltip,
+          iconTheme: iconTheme,
+          isSelected: isSelected,
+          onPressed: () => _sharedOnPressed(attribute),
+          icon: Text(
+            _valueToText[attribute] ??
+                (throw ArgumentError.notNull(
+                  'attrbuite',
+                )),
+            style: style.copyWith(
+              color: isSelected
+                  ? iconTheme?.iconButtonSelectedData?.color
+                  : iconTheme?.iconButtonUnselectedData?.color,
             ),
           ),
         ),

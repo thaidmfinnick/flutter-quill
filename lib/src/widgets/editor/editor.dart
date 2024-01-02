@@ -250,6 +250,7 @@ class QuillEditorState extends State<QuillEditor>
                 color: cursorColor,
                 backgroundColor: Colors.grey,
                 width: 2,
+                height: configurations.cursorHeight,
                 radius: cursorRadius,
                 offset: cursorOffset,
                 paintAboveText:

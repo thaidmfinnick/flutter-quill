@@ -296,7 +296,7 @@ class CursorPainter {
         caretRect = Rect.fromLTWH(
           caretRect.left,
           // caretRect.top + (caretHeight - caretRect.height) / 2,
-          caretRect.top,
+          caretRect.top - 2,
           caretRect.width,
           caretRect.height,
         );
@@ -306,7 +306,7 @@ class CursorPainter {
         // creates a taller caret.
         caretRect = Rect.fromLTWH(
           caretRect.left,
-          caretRect.top,
+          caretRect.top - 2,
           caretRect.width,
           caretHeight,
         );

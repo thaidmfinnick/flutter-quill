@@ -5,14 +5,13 @@ import 'package:url_launcher/url_launcher.dart' show launchUrl;
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class YoutubeVideoApp extends StatefulWidget {
-  const YoutubeVideoApp(
-      {required this.videoUrl,
-      required this.context,
-      required this.readOnly,
-      super.key});
+  const YoutubeVideoApp({
+    required this.videoUrl,
+    required this.readOnly,
+    super.key,
+  });
 
   final String videoUrl;
-  final BuildContext context;
   final bool readOnly;
 
   @override
@@ -60,23 +59,14 @@ class YoutubeVideoAppState extends State<YoutubeVideoApp> {
       );
     }
 
-    return SizedBox(
-      height: 300,
-      child: YoutubePlayerBuilder(
-        player: YoutubePlayer(
-          controller: youtubeController,
-          showVideoProgressIndicator: true,
-        ),
-        builder: (context, player) {
-          return Column(
-            children: [
-              // some widgets
-              player,
-              //some other widgets
-            ],
-          );
-        },
+    return YoutubePlayerBuilder(
+      player: YoutubePlayer(
+        controller: youtubeController,
+        showVideoProgressIndicator: true,
       ),
+      builder: (context, player) {
+        return player;
+      },
     );
   }
 

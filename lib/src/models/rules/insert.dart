@@ -368,9 +368,9 @@ class AutoFormatMultipleLinksRule extends InsertRule {
   // URL generator tool (https://www.randomlists.com/urls) is used.
 
   static const _oneLineLinkPattern =
-      r'(\bhttps?:\/\/[\w\-]+(\.[\w\-]+)+[\w\-\.,@?^=%&:/~\+#\(\)]*[\w\-\@?^=%&/~\+#\(\)])';
+      r'(https?:\/\/|www\.)[\w-\.]+\.[\w-\.]+(\/*([\S]+)?)?';
   static const _detectLinkPattern =
-      r'https?:\/\/[\w\-]+(\.[\w\-]+)*(:\d+)?(\/[^\s]*)?';
+      r'(\bhttps?:\/\/[\w\-]+(\.[\w\-]+)+[\w\-\.,@?^=%&:/~\+#\(\)]*[\w\-\@?^=%&/~\+#\(\)])';
 
   /// It requires a valid link in one link
   static final oneLineLinkRegExp = RegExp(

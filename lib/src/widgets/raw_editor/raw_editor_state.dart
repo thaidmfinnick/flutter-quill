@@ -789,44 +789,7 @@ class QuillRawEditorState extends EditorState
       return KeyEventResult.ignored;
     }
 
-    // Handle inserting lists when space is pressed following
-    // a list initiating phrase.
-    if (event.logicalKey == LogicalKeyboardKey.space) {
-      return _handleSpaceKey(event);
-    }
-
     return KeyEventResult.ignored;
-  }
-
-  KeyEventResult _handleSpaceKey(RawKeyEvent event) {
-    final child =
-        controller.document.queryChild(controller.selection.baseOffset);
-    if (child.node == null) {
-      return KeyEventResult.ignored;
-    }
-
-    final line = child.node as Line?;
-    if (line == null) {
-      return KeyEventResult.ignored;
-    }
-
-    final text = castOrNull<leaf.QuillText>(line.first);
-    if (text == null) {
-      return KeyEventResult.ignored;
-    }
-
-    const olKeyPhrase = '1.';
-    const ulKeyPhrase = '-';
-
-    if (text.value == olKeyPhrase) {
-      _updateSelectionForKeyPhrase(olKeyPhrase, Attribute.ol);
-    } else if (text.value == ulKeyPhrase) {
-      _updateSelectionForKeyPhrase(ulKeyPhrase, Attribute.ul);
-    } else {
-      return KeyEventResult.ignored;
-    }
-
-    return KeyEventResult.handled;
   }
 
   KeyEventResult _handleTabKey(RawKeyEvent event) {

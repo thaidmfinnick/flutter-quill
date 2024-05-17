@@ -228,6 +228,25 @@ class Document {
     return SegmentLeafNode(line, segmentResult.node as Leaf?);
   }
 
+  int compareDeltasAndGetSelection(Delta oldDelta, Delta newDelta) {
+    final oldIterator = DeltaIterator(oldDelta);
+    final newIterator = DeltaIterator(newDelta);
+
+    // Vị trí hiện tại trong văn bản
+    var position = 0;
+
+    while (oldIterator.hasNext || newIterator.hasNext) {
+      final oldOp = oldIterator.next();
+      final newOp = newIterator.next();
+
+      if (oldOp.value != newOp.value || oldOp.key != newOp.key) {
+        return position + (newOp.length ?? 0);
+      }
+      position += newOp.length ?? 0;
+    }
+    return position;
+  }
+
   /// Composes [change] Delta into this document.
   ///
   /// Use this method with caution as it does not apply heuristic rules to the
@@ -238,7 +257,7 @@ class Document {
   /// of this document.
   ///
   /// In case the [change] is invalid, behavior of this method is unspecified.
-  void compose(Delta delta, ChangeSource changeSource) {
+  void compose(Delta delta, ChangeSource changeSource, {bool triggerHistory = false, Function(int)? func}) {
     assert(!_observer.isClosed);
     delta.trim();
     assert(delta.isNotEmpty);
@@ -273,17 +292,22 @@ class Document {
     if (_delta != _root.toDelta()) {
       throw 'Compose failed';
     }
-    final change = DocChange(originalDelta, delta, changeSource);
+    final pos = compareDeltasAndGetSelection(originalDelta, delta);
+    final change = DocChange(originalDelta, delta, changeSource, pos);
     _observer.add(change);
     _history.handleDocChange(change);
+
+    if(triggerHistory && func != null) {
+      func(pos);
+    }
   }
 
-  HistoryChanged undo() {
-    return _history.undo(this);
+  HistoryChanged undo(Function(int) func) {
+    return _history.undo(this, func);
   }
 
-  HistoryChanged redo() {
-    return _history.redo(this);
+  HistoryChanged redo(Function(int) func) {
+    return _history.redo(this, func);
   }
 
   bool get hasUndo => _history.hasUndo;

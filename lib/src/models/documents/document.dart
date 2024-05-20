@@ -257,7 +257,13 @@ class Document {
   /// of this document.
   ///
   /// In case the [change] is invalid, behavior of this method is unspecified.
-  void compose(Delta delta, ChangeSource changeSource, {bool triggerHistory = false, Function(int)? func}) {
+  void compose(
+    Delta delta,
+    ChangeSource changeSource,
+    {
+      Function(int)? func
+    }
+  ) {
     assert(!_observer.isClosed);
     delta.trim();
     assert(delta.isNotEmpty);
@@ -297,8 +303,12 @@ class Document {
     _observer.add(change);
     _history.handleDocChange(change);
 
-    if(triggerHistory && func != null) {
-      func(pos);
+    if(func != null) {
+      if(offset == 0) {
+        func(offset + 1);
+      } else {
+        func(offset);
+      }
     }
   }
 

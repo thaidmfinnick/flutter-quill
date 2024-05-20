@@ -86,7 +86,12 @@ class History {
     }
   }
 
-  HistoryChanged _change(Document doc, List<StackDelta> source, List<StackDelta> dest, Function(int) func) {
+  HistoryChanged _change(
+    Document doc,
+    List<StackDelta> source,
+    List<StackDelta> dest,
+    Function(int) func
+  ) {
     if (source.isEmpty) {
       return const HistoryChanged(false, 0, 0);
     }
@@ -107,7 +112,7 @@ class History {
     dest.add(StackDelta(inverseDelta, stackDelta.position));
     lastRecorded = 0;
     ignoreChange = true;
-    doc.compose(delta, ChangeSource.LOCAL, triggerHistory: true, func: func);
+    doc.compose(delta, ChangeSource.LOCAL, func: func);
     ignoreChange = false;
     return HistoryChanged(true, len, stackDelta.position);
   }

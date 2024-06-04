@@ -141,8 +141,10 @@ mixin RawEditorStateTextInputClientMixin on EditorState
     // with the last known remote value.
     // It is important to prevent excessive remote updates as it can cause
     // race conditions.
+    final composingRange = _lastKnownRemoteTextEditingValue!.composing;
     final actualValue = value.copyWith(
-      composing: _lastKnownRemoteTextEditingValue!.composing,
+      // Ignore last known composing range if it exceeds current text length.
+      composing: composingRange.end > value.text.length ? null : composingRange,
     );
 
     if (actualValue == _lastKnownRemoteTextEditingValue) {
@@ -203,38 +205,8 @@ mixin RawEditorStateTextInputClientMixin on EditorState
         diff.start,
         diff.deleted.length,
         diff.inserted,
-        value.selection.copyWith(
-            affinity: widget.configurations.controller.selection.affinity),
+        value.selection,
       );
-
-      // if (widget.configurations.controller.selectedFontFamily != null) {
-      //   widget.configurations.controller.formatSelection(
-      //     Attribute.fromKeyValue(
-      //       Attribute.font.key,
-      //       widget.configurations.controller.selectedFontFamily?.value,
-      //     ),
-      //   );
-      // }
-
-      // if (widget.configurations.controller.selectedFontSize != null) {
-      //   widget.configurations.controller.formatSelection(
-      //     Attribute.fromKeyValue(
-      //       Attribute.size.key,
-      //       widget.configurations.controller.selectedFontSize == '0'
-      //           ? null
-      //           : getFontSize(
-      //               widget.configurations.controller.selectedFontSize,
-      //             ),
-      //     ),
-      //   );
-      // }
-      // if (widget.configurations.controller.keepStyleOnNewLine) {
-      //   widget.configurations.controller.selectedStyles.forEach((key, value) {
-      //     if (value ?? false) {
-      //       widget.configurations.controller.formatSelection(key);
-      //     }
-      //   });
-      // }
     }
   }
 

@@ -172,6 +172,7 @@ class QuillEditorState extends State<QuillEditor>
   @override
   void initState() {
     super.initState();
+    widget.configurations.controller.editorFocusNode ??= widget.focusNode;
     _editorKey = configurations.editorKey ?? GlobalKey<EditorState>();
     _selectionGestureDetectorBuilder =
         _QuillEditorSelectionGestureDetectorBuilder(
@@ -235,6 +236,8 @@ class QuillEditorState extends State<QuillEditor>
               scrollBottomInset: configurations.scrollBottomInset,
               padding: configurations.padding,
               readOnly: configurations.readOnly,
+              checkBoxReadOnly: configurations.checkBoxReadOnly,
+              disableClipboard: configurations.disableClipboard,
               placeholder: configurations.placeholder,
               onLaunchUrl: configurations.onLaunchUrl,
               contextMenuBuilder: showSelectionToolbar
@@ -277,6 +280,7 @@ class QuillEditorState extends State<QuillEditor>
               customRecognizerBuilder: configurations.customRecognizerBuilder,
               floatingCursorDisabled: configurations.floatingCursorDisabled,
               onImagePaste: configurations.onImagePaste,
+              onGifPaste: configurations.onGifPaste,
               customShortcuts: configurations.customShortcuts,
               customActions: configurations.customActions,
               customLinkPrefixes: configurations.customLinkPrefixes,
@@ -285,6 +289,10 @@ class QuillEditorState extends State<QuillEditor>
               dialogTheme: configurations.dialogTheme,
               contentInsertionConfiguration:
                   configurations.contentInsertionConfiguration,
+              enableScribble: configurations.enableScribble,
+              onScribbleActivated: configurations.onScribbleActivated,
+              scribbleAreaInsets: configurations.scribbleAreaInsets,
+              readOnlyMouseCursor: configurations.readOnlyMouseCursor,
             ),
           ),
         ),
@@ -304,10 +312,10 @@ class QuillEditorState extends State<QuillEditor>
       // that might interfere with the editor key behavior, such as
       // SingleChildScrollView. Thanks to @wliumelb for the workaround.
       // See issue https://github.com/singerdmx/flutter-quill/issues/304
-      return RawKeyboardListener(
-        onKey: (_) {},
+      return KeyboardListener(
+        onKeyEvent: (_) {},
         focusNode: FocusNode(
-          onKey: (node, event) => KeyEventResult.skipRemainingHandlers,
+          onKeyEvent: (node, event) => KeyEventResult.skipRemainingHandlers,
         ),
         child: editor,
       );
@@ -450,7 +458,7 @@ class _QuillEditorSelectionGestureDetectorBuilder
   }
 
   bool isShiftClick(PointerDeviceKind deviceKind) {
-    final pressed = RawKeyboard.instance.keysPressed;
+    final pressed = HardwareKeyboard.instance.logicalKeysPressed;
     return deviceKind == PointerDeviceKind.mouse &&
         (pressed.contains(LogicalKeyboardKey.shiftLeft) ||
             pressed.contains(LogicalKeyboardKey.shiftRight));
@@ -736,8 +744,10 @@ class RenderEditor extends RenderEditableContainerBox
   }
 
   bool get _shiftPressed =>
-      RawKeyboard.instance.keysPressed.contains(LogicalKeyboardKey.shiftLeft) ||
-      RawKeyboard.instance.keysPressed.contains(LogicalKeyboardKey.shiftRight);
+      HardwareKeyboard.instance.logicalKeysPressed
+          .contains(LogicalKeyboardKey.shiftLeft) ||
+      HardwareKeyboard.instance.logicalKeysPressed
+          .contains(LogicalKeyboardKey.shiftRight);
 
   void setStartHandleLayerLink(LayerLink value) {
     if (_startHandleLayerLink == value) {

@@ -32,7 +32,8 @@ class QuillEditorConfigurations extends Equatable {
     this.autoFocus = false,
     this.expands = false,
     this.placeholder,
-    this.readOnly = false,
+    this.checkBoxReadOnly,
+    this.disableClipboard = false,
     this.textSelectionThemeData,
     this.showCursor,
     this.cursorHeight,
@@ -61,6 +62,7 @@ class QuillEditorConfigurations extends Equatable {
     this.floatingCursorDisabled = false,
     this.textSelectionControls,
     this.onImagePaste,
+    this.onGifPaste,
     this.customShortcuts,
     this.customActions,
     this.detectWordBoundary = true,
@@ -76,6 +78,10 @@ class QuillEditorConfigurations extends Equatable {
     this.builder,
     this.magnifierConfiguration,
     this.textInputAction = TextInputAction.newline,
+    this.enableScribble = false,
+    this.onScribbleActivated,
+    this.scribbleAreaInsets,
+    this.readOnlyMouseCursor = SystemMouseCursors.text,
   });
 
   final QuillSharedConfigurations sharedConfigurations;
@@ -91,7 +97,24 @@ class QuillEditorConfigurations extends Equatable {
   /// by any shortcut or keyboard operation. The text is still selectable.
   ///
   /// Defaults to `false`. Must not be `null`.
-  final bool readOnly;
+  bool get readOnly => controller.readOnly;
+
+  /// Override [readOnly] for checkbox.
+  ///
+  /// When this is set to `false`, the checkbox can be checked
+  /// or unchecked while [readOnly] is set to `true`.
+  /// When this is set to `null`, the [readOnly] value is used.
+  ///
+  /// Defaults to `null`.
+  final bool? checkBoxReadOnly;
+
+  /// Disable Clipboard features
+  ///
+  /// when this is set to `true` clipboard can not be used
+  /// this disables the clipboard notification for requesting permissions
+  ///
+  /// Defaults to `false`. Must not be `null`.
+  final bool disableClipboard;
 
   /// Whether this editor should create a scrollable container for its content.
   ///
@@ -120,11 +143,11 @@ class QuillEditorConfigurations extends Equatable {
 
   /// Whether the [onTapOutside] should be triggered or not
   /// Defaults to `true`
-  /// it have default implementation, check [onTapOuside] for more
+  /// it have default implementation, check [onTapOutside] for more
   final bool isOnTapOutsideEnabled;
 
   /// This will run only when [isOnTapOutsideEnabled] is true
-  /// by default on desktop and web it will unfocus
+  /// by default on desktop and web it will un-focus
   /// on mobile it will only unFocus if the kind property of
   /// event [PointerDownEvent] is [PointerDeviceKind.unknown]
   /// you can override this to fit your needs
@@ -135,6 +158,9 @@ class QuillEditorConfigurations extends Equatable {
   /// The cursor refers to the blinking caret when the editor is focused.
   final bool? showCursor;
   final bool? paintCursorAboveText;
+
+  /// The [readOnlyMouseCursor] is used for Windows, macOS when [readOnly] is [true]
+  final MouseCursor readOnlyMouseCursor;
 
   /// Whether to enable user interface affordances for changing the
   /// text selection.
@@ -271,6 +297,11 @@ class QuillEditorConfigurations extends Equatable {
   /// Returns the url of the image if the image should be inserted.
   final Future<String?> Function(Uint8List imageBytes)? onImagePaste;
 
+  /// Callback when the user pastes the given gif.
+  ///
+  /// Returns the url of the gif if the gif should be inserted.
+  final Future<String?> Function(Uint8List imageBytes)? onGifPaste;
+
   /// Contains user-defined shortcuts map.
   ///
   /// [https://docs.flutter.dev/development/ui/advanced/actions-and-shortcuts#shortcuts]
@@ -286,7 +317,7 @@ class QuillEditorConfigurations extends Equatable {
   /// Additional list if links prefixes, which must not be prepended
   /// with "https://" when [LinkMenuAction.launch] happened
   ///
-  /// Useful for deeplinks
+  /// Useful for deep-links
   final List<String> customLinkPrefixes;
 
   /// Configures the dialog theme.
@@ -331,13 +362,22 @@ class QuillEditorConfigurations extends Equatable {
   /// Using custom cursorHeight
   final double? cursorHeight;
 
+  /// Enable Scribble? Currently Apple Pencil only, defaults to false.
+  final bool enableScribble;
+
+  /// Called when Scribble is activated.
+  final void Function()? onScribbleActivated;
+
+  /// Optional insets for the scribble area.
+  final EdgeInsets? scribbleAreaInsets;
+
   @override
   List<Object?> get props => [
         placeholder,
-        readOnly,
+        controller.readOnly,
       ];
 
-  // We might use code generator like freezed but sometimes it can be limitied
+  // We might use code generator like freezed but sometimes it can be limited
   // instead whatever there is a change to the parameters in this class please
   // regenerate this function using extension in vs code or plugin in intellij
 
@@ -346,6 +386,8 @@ class QuillEditorConfigurations extends Equatable {
     QuillController? controller,
     String? placeholder,
     bool? readOnly,
+    bool? checkBoxReadOnly,
+    bool? disableClipboard,
     bool? scrollable,
     double? scrollBottomInset,
     EdgeInsetsGeometry? padding,
@@ -373,6 +415,7 @@ class QuillEditorConfigurations extends Equatable {
     bool? floatingCursorDisabled,
     TextSelectionControls? textSelectionControls,
     Future<String?> Function(Uint8List imageBytes)? onImagePaste,
+    Future<String?> Function(Uint8List imageBytes)? onGifPaste,
     Map<ShortcutActivator, Intent>? customShortcuts,
     Map<Type, Action<Intent>>? customActions,
     bool? detectWordBoundary,
@@ -387,13 +430,17 @@ class QuillEditorConfigurations extends Equatable {
     QuillEditorBuilder? builder,
     TextMagnifierConfiguration? magnifierConfiguration,
     TextInputAction? textInputAction,
-    double? cursorHeight
+    double? cursorHeight,
+    bool? enableScribble,
+    void Function()? onScribbleActivated,
+    EdgeInsets? scribbleAreaInsets,
   }) {
     return QuillEditorConfigurations(
       sharedConfigurations: sharedConfigurations ?? this.sharedConfigurations,
       controller: controller ?? this.controller,
       placeholder: placeholder ?? this.placeholder,
-      readOnly: readOnly ?? this.readOnly,
+      checkBoxReadOnly: checkBoxReadOnly ?? this.checkBoxReadOnly,
+      disableClipboard: disableClipboard ?? this.disableClipboard,
       scrollable: scrollable ?? this.scrollable,
       scrollBottomInset: scrollBottomInset ?? this.scrollBottomInset,
       padding: padding ?? this.padding,
@@ -428,6 +475,7 @@ class QuillEditorConfigurations extends Equatable {
       textSelectionControls:
           textSelectionControls ?? this.textSelectionControls,
       onImagePaste: onImagePaste ?? this.onImagePaste,
+      onGifPaste: onGifPaste ?? this.onGifPaste,
       customShortcuts: customShortcuts ?? this.customShortcuts,
       customActions: customActions ?? this.customActions,
       detectWordBoundary: detectWordBoundary ?? this.detectWordBoundary,
@@ -447,7 +495,10 @@ class QuillEditorConfigurations extends Equatable {
       magnifierConfiguration:
           magnifierConfiguration ?? this.magnifierConfiguration,
       textInputAction: textInputAction ?? this.textInputAction,
-      cursorHeight: cursorHeight ?? this.cursorHeight
+      cursorHeight: cursorHeight ?? this.cursorHeight,
+      enableScribble: enableScribble ?? this.enableScribble,
+      onScribbleActivated: onScribbleActivated ?? this.onScribbleActivated,
+      scribbleAreaInsets: scribbleAreaInsets ?? this.scribbleAreaInsets,
     );
   }
 }

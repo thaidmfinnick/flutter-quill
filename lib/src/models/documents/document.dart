@@ -1,10 +1,6 @@
 import 'dart:async' show StreamController;
 
-import 'package:html2md/html2md.dart' as html2md;
-import 'package:markdown/markdown.dart' as md;
 import 'package:meta/meta.dart';
-
-import '../../../markdown_quill.dart';
 
 import '../../../quill_delta.dart';
 import '../../widgets/quill/embeds.dart';
@@ -14,6 +10,7 @@ import '../structs/history_changed.dart';
 import '../structs/offset_value.dart';
 import '../structs/segment_leaf_node.dart';
 import 'attribute.dart';
+import 'delta_x.dart';
 import 'history.dart';
 import 'nodes/block.dart';
 import 'nodes/container.dart';
@@ -114,23 +111,42 @@ class Document {
   /// Returns an instance of [Delta] actually composed into this document.
   Delta replace(int index, int len, Object? data) {
     assert(index >= 0);
-    assert(data is String || data is Embeddable);
-
-    final dataIsNotEmpty = (data is String) ? data.isNotEmpty : true;
-
-    assert(dataIsNotEmpty || len > 0);
+    assert(data is String || data is Embeddable || data is Delta);
 
     var delta = Delta();
 
-    // We have to insert before applying delete rules
-    // Otherwise delete would be operating on stale document snapshot.
-    if (dataIsNotEmpty) {
-      delta = insert(index, data, replaceLength: len);
-    }
+    if (data is Delta) {
+      // move to insertion point and add the inserted content
+      if (index > 0) {
+        delta.retain(index);
+      }
 
-    if (len > 0) {
-      final deleteDelta = delete(index, len);
-      delta = delta.compose(deleteDelta);
+      // remove any text we are replacing
+      if (len > 0) {
+        delta.delete(len);
+      }
+
+      // add the pasted content
+      for (final op in data.operations) {
+        delta.push(op);
+      }
+
+      compose(delta, ChangeSource.local);
+    } else {
+      final dataIsNotEmpty = (data is String) ? data.isNotEmpty : true;
+
+      assert(dataIsNotEmpty || len > 0);
+
+      // We have to insert before applying delete rules
+      // Otherwise delete would be operating on stale document snapshot.
+      if (dataIsNotEmpty) {
+        delta = insert(index, data, replaceLength: len);
+      }
+
+      if (len > 0) {
+        final deleteDelta = delete(index, len);
+        delta = delta.compose(deleteDelta);
+      }
     }
 
     return delta;
@@ -168,11 +184,7 @@ class Document {
       return (res.node as Line).collectStyle(res.offset, len);
     }
     if (res.offset == 0) {
-      rangeStyle = (res.node as Line).collectStyle(res.offset, len);
-      return rangeStyle.removeAll({
-        for (final attr in rangeStyle.values)
-          if (attr.isInline) attr
-      });
+      return rangeStyle = (res.node as Line).collectStyle(res.offset, len);
     }
     rangeStyle = (res.node as Line).collectStyle(res.offset - 1, len);
     final linkAttribute = rangeStyle.attributes[Attribute.link.key];
@@ -450,43 +462,10 @@ class Document {
         delta.first.key == 'insert';
   }
 
-  /// Convert the HTML Raw string to [Delta]
-  ///
-  /// It will run using the following steps:
-  ///
-  /// 1. Convert the html to markdown string using `html2md` package
-  /// 2. Convert the markdown string to quill delta json string
-  /// 3. Decode the delta json string to [Delta]
-  ///
-  /// for more [info](https://github.com/singerdmx/flutter-quill/issues/1100)
-  ///
-  /// Please notice that this api is designed to be used internally and shouldn't
-  /// used for real world applications
-  ///
+  /// Convert the HTML Raw string to [Document]
   @experimental
-  static Delta fromHtml(String html) {
-    final markdown = html2md
-        .convert(
-          html,
-        )
-        .replaceAll('unsafe:', '');
-
-    final mdDocument = md.Document(encodeHtml: false);
-
-    final mdToDelta = MarkdownToDelta(markdownDocument: mdDocument);
-
-    return mdToDelta.convert(markdown);
-
-    // final deltaJsonString = markdownToDelta(markdown);
-    // final deltaJson = jsonDecode(deltaJsonString);
-    // if (deltaJson is! List) {
-    //   throw ArgumentError(
-    //     'The delta json string should be of type list when jsonDecode() it',
-    //   );
-    // }
-    // return Delta.fromJson(
-    //   deltaJson,
-    // );
+  static Document fromHtml(String html) {
+    return Document.fromDelta(DeltaX.fromHtml(html));
   }
 }
 

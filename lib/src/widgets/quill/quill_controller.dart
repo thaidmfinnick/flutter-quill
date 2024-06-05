@@ -64,7 +64,7 @@ class QuillController extends ChangeNotifier {
   }) {
     final newDocument = Document.fromDelta(delta);
 
-    final change = DocChange(_document.toDelta(), delta, changeSource);
+    final change = DocChange(_document.toDelta(), delta, changeSource, 0);
     newDocument.documentChangeObserver.add(change);
     newDocument.history.handleDocChange(change);
 
@@ -209,26 +209,21 @@ class QuillController extends ChangeNotifier {
   }
 
   void undo() {
-    final result = document.undo();
-    if (result.changed) {
-      _handleHistoryChange(result.len);
-    }
+    document.undo(_handleHistoryChange);
   }
 
-  void _handleHistoryChange(int len) {
-    updateSelection(
-      TextSelection.collapsed(
-        offset: len,
-      ),
-      ChangeSource.local,
-    );
+  void _handleHistoryChange(int pos) {
+    if (pos != 0) {
+      updateSelection(
+          TextSelection.collapsed(offset: pos),
+          ChangeSource.local);
+    } else {
+      // no need to move cursor
+    }
   }
 
   void redo() {
-    final result = document.redo();
-    if (result.changed) {
-      _handleHistoryChange(result.len);
-    }
+    document.redo(_handleHistoryChange);
   }
 
   bool get hasUndo => document.hasUndo;

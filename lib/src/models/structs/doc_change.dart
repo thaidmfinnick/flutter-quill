@@ -21,6 +21,5 @@ class DocChange {
   /// The source of this change.
   final ChangeSource source;
 
-
   final int position;
 }

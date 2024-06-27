@@ -1175,7 +1175,7 @@ class RawEditorState extends EditorState
     _pasteStyle = controller.getAllIndividualSelectionStyles();
 
     final selection = textEditingValue.selection;
-    final text = textEditingValue.text;
+    final text = textEditingValue.text.replaceAll('wcake://i/', 'https://pancakework.vn/api/i/');
     if (selection.isCollapsed) {
       return;
     }

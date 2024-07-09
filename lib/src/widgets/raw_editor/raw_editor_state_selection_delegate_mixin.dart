@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../models/documents/document.dart';
@@ -153,16 +154,28 @@ mixin RawEditorStateSelectionDelegateMixin on EditorState
     textEditingValue = value;
   }
 
-  @override
-  bool get cutEnabled => widget.contextMenuBuilder != null && !widget.readOnly;
+  bool get hasSelection =>
+    textEditingValue.selection.baseOffset
+    != textEditingValue.selection.extentOffset;
 
   @override
-  bool get copyEnabled => widget.contextMenuBuilder != null;
+  bool get cutEnabled =>
+    widget.contextMenuBuilder != null
+    && hasSelection && !widget.readOnly;
+
+  @override
+  bool get copyEnabled =>
+    widget.contextMenuBuilder != null
+    && hasSelection;
 
   @override
   bool get pasteEnabled =>
       widget.contextMenuBuilder != null && !widget.readOnly;
 
   @override
-  bool get selectAllEnabled => widget.contextMenuBuilder != null;
+  bool get selectAllEnabled =>
+    widget.contextMenuBuilder != null
+    && isEmptyText;
+
+  bool get isEmptyText => textEditingValue.text.trim().isNotEmpty;
 }

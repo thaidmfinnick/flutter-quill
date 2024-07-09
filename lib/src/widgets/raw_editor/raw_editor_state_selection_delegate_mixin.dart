@@ -115,13 +115,21 @@ mixin RawEditorStateSelectionDelegateMixin on EditorState
     textEditingValue = value;
   }
 
+  bool get hasSelection =>
+    textEditingValue.selection.baseOffset
+    != textEditingValue.selection.extentOffset;
+
+  bool get isEmptyText => textEditingValue.text.trim().isNotEmpty;
+
   @override
   bool get cutEnabled =>
       widget.configurations.contextMenuBuilder != null &&
-      !widget.configurations.readOnly;
+      !widget.configurations.readOnly && hasSelection;
 
   @override
-  bool get copyEnabled => widget.configurations.contextMenuBuilder != null;
+  bool get copyEnabled =>
+    widget.configurations.contextMenuBuilder != null
+    && hasSelection;
 
   @override
   bool get pasteEnabled =>
@@ -129,5 +137,7 @@ mixin RawEditorStateSelectionDelegateMixin on EditorState
       !widget.configurations.readOnly;
 
   @override
-  bool get selectAllEnabled => widget.configurations.contextMenuBuilder != null;
+  bool get selectAllEnabled =>
+    widget.configurations.contextMenuBuilder != null
+    && isEmptyText;
 }

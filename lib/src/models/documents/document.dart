@@ -344,7 +344,11 @@ class Document {
     history.handleDocChange(change);
 
     if(triggerHistory && func != null) {
-      func(pos);
+      if(offset == 0) {
+        func(offset + 1);
+      } else {
+        func(offset);
+      }
     }
   }
 

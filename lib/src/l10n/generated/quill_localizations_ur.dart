@@ -128,6 +128,9 @@ class FlutterQuillLocalizationsUr extends FlutterQuillLocalizations {
   String get alignRight => 'دائیں ہم آہنگ ہوں';
 
   @override
+  String get alignJustify => 'Align justify';
+
+  @override
   String get justifyWinWidth => 'جسٹیفائی ون چوڑائی';
 
   @override
@@ -204,6 +207,9 @@ class FlutterQuillLocalizationsUr extends FlutterQuillLocalizations {
 
   @override
   String get color => 'رنگ';
+
+  @override
+  String get lineheight => 'لکیر کی اونچائی';
 
   @override
   String get findText => 'متن تلاش کریں';
@@ -293,4 +299,7 @@ class FlutterQuillLocalizationsUr extends FlutterQuillLocalizations {
 
   @override
   String get paste => 'Paste';
+
+  @override
+  String get insertTable => 'Insert table';
 }

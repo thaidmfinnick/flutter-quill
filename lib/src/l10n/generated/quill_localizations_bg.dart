@@ -128,6 +128,9 @@ class FlutterQuillLocalizationsBg extends FlutterQuillLocalizations {
   String get alignRight => 'Подравни вдясно';
 
   @override
+  String get alignJustify => 'Align justify';
+
+  @override
   String get justifyWinWidth => 'Подравни във всяка колонка';
 
   @override
@@ -204,6 +207,9 @@ class FlutterQuillLocalizationsBg extends FlutterQuillLocalizations {
 
   @override
   String get color => 'Цвят';
+
+  @override
+  String get lineheight => 'височина на линията';
 
   @override
   String get findText => 'Намери текст';
@@ -290,4 +296,7 @@ class FlutterQuillLocalizationsBg extends FlutterQuillLocalizations {
 
   @override
   String get paste => 'Paste';
+
+  @override
+  String get insertTable => 'Insert table';
 }

@@ -128,6 +128,9 @@ class FlutterQuillLocalizationsVi extends FlutterQuillLocalizations {
   String get alignRight => 'Căn phải';
 
   @override
+  String get alignJustify => 'Align justify';
+
+  @override
   String get justifyWinWidth => 'Căn đều chiều rộng';
 
   @override
@@ -204,6 +207,9 @@ class FlutterQuillLocalizationsVi extends FlutterQuillLocalizations {
 
   @override
   String get color => 'Màu';
+
+  @override
+  String get lineheight => 'Chiều cao giữa các dòng';
 
   @override
   String get findText => 'Tìm văn bản';
@@ -290,4 +296,7 @@ class FlutterQuillLocalizationsVi extends FlutterQuillLocalizations {
 
   @override
   String get paste => 'Paste';
+
+  @override
+  String get insertTable => 'Insert table';
 }

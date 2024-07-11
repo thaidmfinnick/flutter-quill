@@ -128,6 +128,9 @@ class FlutterQuillLocalizationsBn extends FlutterQuillLocalizations {
   String get alignRight => 'ডান সারিবদ্ধ';
 
   @override
+  String get alignJustify => 'Align justify';
+
+  @override
   String get justifyWinWidth => 'প্রস্থের সাথে সংযত';
 
   @override
@@ -204,6 +207,9 @@ class FlutterQuillLocalizationsBn extends FlutterQuillLocalizations {
 
   @override
   String get color => 'কালার';
+
+  @override
+  String get lineheight => 'লাইনের উচ্চতা';
 
   @override
   String get findText => 'পাঠ্য খুঁজুন';
@@ -290,4 +296,7 @@ class FlutterQuillLocalizationsBn extends FlutterQuillLocalizations {
 
   @override
   String get paste => 'Paste';
+
+  @override
+  String get insertTable => 'Insert table';
 }

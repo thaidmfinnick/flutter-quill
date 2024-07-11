@@ -4,6 +4,12 @@ import 'package:flutter/widgets.dart'
 
 import '../../../widgets/quill/embeds.dart';
 import '../../../widgets/quill/quill_controller.dart';
+import '../../../widgets/toolbar/buttons/hearder_style/select_header_style_buttons.dart';
+import '../../../widgets/toolbar/buttons/hearder_style/select_header_style_dropdown_button.dart';
+import '../../../widgets/toolbar/buttons/link_style2_button.dart';
+import '../../../widgets/toolbar/buttons/link_style_button.dart';
+import '../../../widgets/toolbar/buttons/search/legacy/legacy_search_button.dart';
+import '../../../widgets/toolbar/buttons/search/search_button.dart';
 import '../../themes/quill_dialog_theme.dart';
 import '../../themes/quill_icon_theme.dart';
 import 'simple_toolbar_button_options.dart';
@@ -62,6 +68,14 @@ enum HeaderStyleType {
   bool get isButtons => this == HeaderStyleType.buttons;
 }
 
+enum SearchButtonType {
+  /// Will use [QuillToolbarSearchButton]
+  legacy,
+
+  /// Will use [QuillToolbarLegacySearchButton]
+  modern,
+}
+
 /// The configurations for the toolbar widget of flutter quill
 @immutable
 class QuillSimpleToolbarConfigurations extends QuillSharedToolbarProperties {
@@ -83,6 +97,7 @@ class QuillSimpleToolbarConfigurations extends QuillSharedToolbarProperties {
     this.showItalicButton = true,
     this.showSmallButton = false,
     this.showUnderLineButton = true,
+    this.showLineHeightButton = false,
     this.showStrikeThrough = true,
     this.showInlineCode = true,
     this.showColorButton = true,
@@ -112,6 +127,7 @@ class QuillSimpleToolbarConfigurations extends QuillSharedToolbarProperties {
     this.showClipboardPaste = true,
     this.linkStyleType = LinkStyleType.original,
     this.headerStyleType = HeaderStyleType.original,
+    this.searchButtonType = SearchButtonType.modern,
 
     /// The decoration to use for the toolbar.
     super.decoration,
@@ -202,6 +218,10 @@ class QuillSimpleToolbarConfigurations extends QuillSharedToolbarProperties {
   final bool showClipboardCopy;
   final bool showClipboardPaste;
 
+  /// This activates a functionality that is only implemented in [flutter_quill] and is NOT originally
+  /// used in the [Quill Js API]. So it could cause conflicts if you use this attribute with the original Delta format of Quill Js
+  final bool showLineHeightButton;
+
   /// Toolbar items to display for controls of embed blocks
   final List<EmbedButtonBuilder>? embedButtons;
 
@@ -217,6 +237,9 @@ class QuillSimpleToolbarConfigurations extends QuillSharedToolbarProperties {
 
   /// Defines which dialog is used for applying header attribute.
   final HeaderStyleType headerStyleType;
+
+  /// Define which button type should be used for the [showSearchButton]
+  final SearchButtonType searchButtonType;
 
   @override
   List<Object?> get props => [

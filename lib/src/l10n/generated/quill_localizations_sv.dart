@@ -128,6 +128,9 @@ class FlutterQuillLocalizationsSv extends FlutterQuillLocalizations {
   String get alignRight => 'Högerjustera';
 
   @override
+  String get alignJustify => 'Align justify';
+
+  @override
   String get justifyWinWidth => 'Justera till fönsterbredd';
 
   @override
@@ -204,6 +207,9 @@ class FlutterQuillLocalizationsSv extends FlutterQuillLocalizations {
 
   @override
   String get color => 'Färg';
+
+  @override
+  String get lineheight => 'Radavstånd';
 
   @override
   String get findText => 'Hitta text';
@@ -290,4 +296,7 @@ class FlutterQuillLocalizationsSv extends FlutterQuillLocalizations {
 
   @override
   String get paste => 'Paste';
+
+  @override
+  String get insertTable => 'Insert table';
 }

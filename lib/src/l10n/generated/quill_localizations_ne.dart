@@ -128,6 +128,9 @@ class FlutterQuillLocalizationsNe extends FlutterQuillLocalizations {
   String get alignRight => 'दायाँ पङ्क्तिबद्ध';
 
   @override
+  String get alignJustify => 'Align justify';
+
+  @override
   String get justifyWinWidth => 'जस्टीफ़ी विन चौड़ाई';
 
   @override
@@ -204,6 +207,9 @@ class FlutterQuillLocalizationsNe extends FlutterQuillLocalizations {
 
   @override
   String get color => 'रङ';
+
+  @override
+  String get lineheight => 'रेखा-उचाइ';
 
   @override
   String get findText => 'टेक्स्ट फेला पार्नुहोस्';
@@ -294,4 +300,7 @@ class FlutterQuillLocalizationsNe extends FlutterQuillLocalizations {
 
   @override
   String get paste => 'Paste';
+
+  @override
+  String get insertTable => 'Insert table';
 }

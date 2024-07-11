@@ -128,6 +128,9 @@ class FlutterQuillLocalizationsPt extends FlutterQuillLocalizations {
   String get alignRight => 'Align right';
 
   @override
+  String get alignJustify => 'Align justify';
+
+  @override
   String get justifyWinWidth => 'Justify win width';
 
   @override
@@ -204,6 +207,9 @@ class FlutterQuillLocalizationsPt extends FlutterQuillLocalizations {
 
   @override
   String get color => 'Cor';
+
+  @override
+  String get lineheight => 'Altura da linha';
 
   @override
   String get findText => 'Find text';
@@ -290,6 +296,9 @@ class FlutterQuillLocalizationsPt extends FlutterQuillLocalizations {
 
   @override
   String get paste => 'Paste';
+
+  @override
+  String get insertTable => 'Insert table';
 }
 
 /// The translations for Portuguese, as used in Brazil (`pt_BR`).
@@ -475,6 +484,9 @@ class FlutterQuillLocalizationsPtBr extends FlutterQuillLocalizationsPt {
 
   @override
   String get color => 'Cor';
+
+  @override
+  String get lineheight => 'Altura da linha';
 
   @override
   String get findText => 'Find text';

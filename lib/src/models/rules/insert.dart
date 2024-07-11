@@ -33,7 +33,7 @@ class PreserveLineStyleOnSplitRule extends InsertRule {
 
   @override
   Delta? applyRule(
-    Delta document,
+    Document document,
     int index, {
     int? len,
     Object? data,
@@ -42,8 +42,7 @@ class PreserveLineStyleOnSplitRule extends InsertRule {
     if (data is! String || data != '\n') {
       return null;
     }
-
-    final itr = DeltaIterator(document);
+    final itr = DeltaIterator(document.toDelta());
     final before = itr.skip(index);
     if (before == null) {
       return null;
@@ -84,7 +83,7 @@ class PreserveBlockStyleOnInsertRule extends InsertRule {
 
   @override
   Delta? applyRule(
-    Delta document,
+    Document document,
     int index, {
     int? len,
     Object? data,
@@ -94,8 +93,7 @@ class PreserveBlockStyleOnInsertRule extends InsertRule {
       // Only interested in text containing at least one newline character.
       return null;
     }
-
-    final itr = DeltaIterator(document)..skip(index);
+    final itr = DeltaIterator(document.toDelta())..skip(index);
 
     // Look for the next newline.
     final nextNewLine = _getNextNewLine(itr);
@@ -173,7 +171,7 @@ class AutoExitBlockRule extends InsertRule {
 
   @override
   Delta? applyRule(
-    Delta document,
+    Document document,
     int index, {
     int? len,
     Object? data,
@@ -183,7 +181,7 @@ class AutoExitBlockRule extends InsertRule {
       return null;
     }
 
-    final itr = DeltaIterator(document);
+    final itr = DeltaIterator(document.toDelta());
     final prev = itr.skip(index), cur = itr.next();
     final blockStyle = Style.fromJson(cur.attributes).getBlockExceptHeader();
     // We are not in a block, ignore.
@@ -243,7 +241,7 @@ class ResetLineFormatOnNewLineRule extends InsertRule {
 
   @override
   Delta? applyRule(
-    Delta document,
+    Document document,
     int index, {
     int? len,
     Object? data,
@@ -253,7 +251,7 @@ class ResetLineFormatOnNewLineRule extends InsertRule {
       return null;
     }
 
-    final itr = DeltaIterator(document)..skip(index);
+    final itr = DeltaIterator(document.toDelta())..skip(index);
     final cur = itr.next();
     if (cur.data is! String || !(cur.data as String).startsWith('\n')) {
       return null;
@@ -280,7 +278,7 @@ class InsertEmbedsRule extends InsertRule {
 
   @override
   Delta? applyRule(
-    Delta document,
+    Document document,
     int index, {
     int? len,
     Object? data,
@@ -297,7 +295,7 @@ class InsertEmbedsRule extends InsertRule {
     }
 
     final delta = Delta()..retain(index + (len ?? 0));
-    final itr = DeltaIterator(document);
+    final itr = DeltaIterator(document.toDelta());
     final prev = itr.skip(index), cur = itr.next();
 
     final textBefore = prev?.data is String ? prev!.data as String? : '';
@@ -374,22 +372,22 @@ class AutoFormatMultipleLinksRule extends InsertRule {
       r'(\bhttps?:\/\/[\w\.\-]+(:\d+)?(?:\/[^\/\s]*)*(?:\?[^\s]*)?(?:#[^\s]*)?)|(wcake:\/\/i\/[A-Za-z0-9\+\/=\-\_]+)';
 
   /// It requires a valid link in one link
-  static final oneLineLinkRegExp = RegExp(
-    _oneLineLinkPattern,
-    caseSensitive: false,
-  );
+  RegExp get oneLineLinkRegExp => RegExp(
+        _oneLineLinkPattern,
+        caseSensitive: false,
+      );
 
   /// It detect if there is a link in the text whatever if it in the middle etc
   // Used to solve bug https://github.com/singerdmx/flutter-quill/issues/1432
-  static final detectLinkRegExp = RegExp(
-    _detectLinkPattern,
-    caseSensitive: false,
-  );
-  static final linkRegExp = oneLineLinkRegExp;
+  RegExp get detectLinkRegExp => RegExp(
+        _detectLinkPattern,
+        caseSensitive: false,
+      );
+  RegExp get linkRegExp => oneLineLinkRegExp;
 
   @override
   Delta? applyRule(
-    Delta document,
+    Document document,
     int index, {
     int? len,
     Object? data,
@@ -400,7 +398,7 @@ class AutoFormatMultipleLinksRule extends InsertRule {
     if (data is! String) return null;
 
     // Get current text.
-    final entireText = Document.fromDelta(document).toPlainText();
+    final entireText = document.toPlainText();
 
     // Get word before insertion.
     final leftWordPart = entireText
@@ -505,7 +503,7 @@ class AutoFormatLinksRule extends InsertRule {
 
   @override
   Delta? applyRule(
-    Delta document,
+    Document document,
     int index, {
     int? len,
     Object? data,
@@ -515,7 +513,7 @@ class AutoFormatLinksRule extends InsertRule {
       return null;
     }
 
-    final itr = DeltaIterator(document);
+    final itr = DeltaIterator(document.toDelta());
     final prev = itr.skip(index);
     if (prev == null || prev.data is! String) {
       return null;
@@ -551,7 +549,7 @@ class PreserveInlineStylesRule extends InsertRule {
 
   @override
   Delta? applyRule(
-    Delta document,
+    Document document,
     int index, {
     int? len,
     Object? data,
@@ -561,26 +559,47 @@ class PreserveInlineStylesRule extends InsertRule {
       return null;
     }
 
-    final itr = DeltaIterator(document);
+    final documentDelta = document.toDelta();
+    final itr = DeltaIterator(documentDelta);
     var prev = itr.skip(len == 0 ? index : index + 1);
 
     if (prev == null || prev.data is! String) return null;
 
-    if ((prev.data as String).endsWith('\n')) {
-      if (prev.attributes != null) {
-        for (final key in prev.attributes!.keys) {
-          if (!Attribute.inlineKeys.contains(key)) {
-            return null;
+    /// Trap for simple insertions at start of line
+    if (len == 0) {
+      final prevData = prev.data as String;
+      if (prevData.endsWith('\n')) {
+        /// If current line is empty get attributes from a prior line
+        final currLine = itr.next();
+        final currData = currLine.data as String?;
+        if (currData != null && (currData.isEmpty || currData[0] == '\n')) {
+          if (prevData.trimRight().isEmpty) {
+            final back =
+                DeltaIterator(documentDelta).skip(index - prevData.length);
+            if (back != null && back.data is String) {
+              prev = back;
+            }
           }
+        } else {
+          prev = currLine;
         }
       }
-      prev = itr
-          .next(); // at the start of a line, apply the style for the current line and not the style for the preceding line
     }
 
-    final attributes = prev.attributes;
+    final attributes = <String, dynamic>{};
+    if (prev.attributes != null) {
+      for (final entry in prev.attributes!.entries) {
+        if (Attribute.inlineKeys.contains(entry.key)) {
+          attributes[entry.key] = entry.value;
+        }
+      }
+    }
+    if (attributes.isEmpty) {
+      return null;
+    }
+
     final text = data;
-    if (attributes == null || !attributes.containsKey(Attribute.link.key)) {
+    if (attributes.isEmpty || !attributes.containsKey(Attribute.link.key)) {
       return Delta()
         ..retain(index + (len ?? 0))
         ..insert(text, attributes);
@@ -612,7 +631,7 @@ class CatchAllInsertRule extends InsertRule {
 
   @override
   Delta applyRule(
-    Delta document,
+    Document document,
     int index, {
     int? len,
     Object? data,

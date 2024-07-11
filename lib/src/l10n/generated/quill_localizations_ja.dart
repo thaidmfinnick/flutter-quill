@@ -128,6 +128,9 @@ class FlutterQuillLocalizationsJa extends FlutterQuillLocalizations {
   String get alignRight => '右揃え';
 
   @override
+  String get alignJustify => 'Align justify';
+
+  @override
   String get justifyWinWidth => '両端揃え';
 
   @override
@@ -204,6 +207,9 @@ class FlutterQuillLocalizationsJa extends FlutterQuillLocalizations {
 
   @override
   String get color => 'Color';
+
+  @override
+  String get lineheight => '行の高さ';
 
   @override
   String get findText => '検索テキスト';
@@ -287,4 +293,7 @@ class FlutterQuillLocalizationsJa extends FlutterQuillLocalizations {
 
   @override
   String get paste => 'Paste';
+
+  @override
+  String get insertTable => 'Insert table';
 }

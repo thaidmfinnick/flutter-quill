@@ -128,6 +128,9 @@ class FlutterQuillLocalizationsTk extends FlutterQuillLocalizations {
   String get alignRight => 'Saga deňleşdir';
 
   @override
+  String get alignJustify => 'Align justify';
+
+  @override
   String get justifyWinWidth => 'Justify win width';
 
   @override
@@ -204,6 +207,9 @@ class FlutterQuillLocalizationsTk extends FlutterQuillLocalizations {
 
   @override
   String get color => 'Reňk';
+
+  @override
+  String get lineheight => 'Çyzyk beýikligi';
 
   @override
   String get findText => 'Tekst tapyň';
@@ -288,4 +294,7 @@ class FlutterQuillLocalizationsTk extends FlutterQuillLocalizations {
 
   @override
   String get paste => 'Paste';
+
+  @override
+  String get insertTable => 'Insert table';
 }

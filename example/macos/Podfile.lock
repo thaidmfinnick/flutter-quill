@@ -49,13 +49,10 @@ DEPENDENCIES:
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
   - video_player_avfoundation (from `Flutter/ephemeral/.symlinks/plugins/video_player_avfoundation/darwin`)
 
-<<<<<<< HEAD
-=======
 SPEC REPOS:
   trunk:
     - OrderedSet
 
->>>>>>> 13c549c304122659d5e139369d03af461fb30eb6
 EXTERNAL SOURCES:
   desktop_drop:
     :path: Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos

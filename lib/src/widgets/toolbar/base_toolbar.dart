@@ -22,7 +22,9 @@ export 'buttons/indent_button.dart';
 export 'buttons/link_style2_button.dart';
 export 'buttons/link_style_button.dart';
 export 'buttons/quill_icon_button.dart';
+export 'buttons/search/legacy/legacy_search_button.dart';
 export 'buttons/search/search_button.dart';
+export 'buttons/select_line_height_dropdown_button.dart';
 export 'buttons/toggle_check_list_button.dart';
 export 'buttons/toggle_style_button.dart';
 

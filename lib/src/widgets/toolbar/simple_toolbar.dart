@@ -31,6 +31,7 @@ class QuillSimpleToolbar extends StatelessWidget
           configurations.showItalicButton ||
           configurations.showSmallButton ||
           configurations.showUnderLineButton ||
+          configurations.showLineHeightButton ||
           configurations.showStrikeThrough ||
           configurations.showInlineCode ||
           configurations.showColorButton ||
@@ -195,6 +196,12 @@ class QuillSimpleToolbar extends StatelessWidget
                 isButtonGroupShown[4] ||
                 isButtonGroupShown[5]))
           divider,
+        if (configurations.showLineHeightButton)
+          QuillToolbarSelectLineHeightStyleDropdownButton(
+            controller: globalController,
+            options: toolbarConfigurations
+                .buttonOptions.selectLineHeightStyleDropdownButton,
+          ),
         if (configurations.showHeaderStyle) ...[
           if (configurations.headerStyleType.isOriginal)
             QuillToolbarSelectHeaderStyleDropdownButton(
@@ -277,10 +284,16 @@ class QuillSimpleToolbar extends StatelessWidget
                   options: toolbarConfigurations.buttonOptions.linkStyle2,
                 ),
         if (configurations.showSearchButton)
-          QuillToolbarSearchButton(
-            controller: globalController,
-            options: toolbarConfigurations.buttonOptions.search,
-          ),
+          switch (configurations.searchButtonType) {
+            SearchButtonType.legacy => QuillToolbarLegacySearchButton(
+                controller: globalController,
+                options: toolbarConfigurations.buttonOptions.search,
+              ),
+            SearchButtonType.modern => QuillToolbarSearchButton(
+                controller: globalController,
+                options: toolbarConfigurations.buttonOptions.search,
+              ),
+          },
         if (configurations.showClipboardCut)
           QuillToolbarClipboardButton(
             options: toolbarConfigurations.buttonOptions.clipboardCut,
@@ -306,20 +319,6 @@ class QuillSimpleToolbar extends StatelessWidget
               options: customButton,
               controller: globalController,
             ),
-          // if (customButton.child != null) ...[
-          //   InkWell(
-          //     onTap: customButton.onTap,
-          //     child: customButton.child,
-          //   ),
-          // ] else ...[
-          //   QuillToolbarCustomButton(
-          //     options:
-          //         toolbarConfigurations.buttonOptions.customButtons,
-          //     controller: toolbarConfigurations
-          //             .buttonOptions.customButtons.controller ??
-          //         globalController,
-          //   ),
-          // ],
         ],
       ];
     }

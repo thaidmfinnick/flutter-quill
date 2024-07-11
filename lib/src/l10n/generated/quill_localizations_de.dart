@@ -128,6 +128,9 @@ class FlutterQuillLocalizationsDe extends FlutterQuillLocalizations {
   String get alignRight => 'Rechtsbündig ausrichten';
 
   @override
+  String get alignJustify => 'Align justify';
+
+  @override
   String get justifyWinWidth => 'Blocksatz';
 
   @override
@@ -204,6 +207,9 @@ class FlutterQuillLocalizationsDe extends FlutterQuillLocalizations {
 
   @override
   String get color => 'Farbe';
+
+  @override
+  String get lineheight => 'Zeilenhöhe';
 
   @override
   String get findText => 'Text suchen';
@@ -294,4 +300,7 @@ class FlutterQuillLocalizationsDe extends FlutterQuillLocalizations {
 
   @override
   String get paste => 'Paste';
+
+  @override
+  String get insertTable => 'Insert table';
 }

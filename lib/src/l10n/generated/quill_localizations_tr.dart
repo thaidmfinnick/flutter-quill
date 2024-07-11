@@ -128,6 +128,9 @@ class FlutterQuillLocalizationsTr extends FlutterQuillLocalizations {
   String get alignRight => 'Sağa Hizala';
 
   @override
+  String get alignJustify => 'Align justify';
+
+  @override
   String get justifyWinWidth => 'Kenarlara Hizala';
 
   @override
@@ -204,6 +207,9 @@ class FlutterQuillLocalizationsTr extends FlutterQuillLocalizations {
 
   @override
   String get color => 'Renk';
+
+  @override
+  String get lineheight => 'Satır yüksekliği';
 
   @override
   String get findText => 'Find text';
@@ -289,4 +295,7 @@ class FlutterQuillLocalizationsTr extends FlutterQuillLocalizations {
 
   @override
   String get paste => 'Paste';
+
+  @override
+  String get insertTable => 'Insert table';
 }

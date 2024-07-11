@@ -128,6 +128,9 @@ class FlutterQuillLocalizationsHe extends FlutterQuillLocalizations {
   String get alignRight => 'יישור לימין';
 
   @override
+  String get alignJustify => 'Align justify';
+
+  @override
   String get justifyWinWidth => 'יישור לרוחב החלון';
 
   @override
@@ -204,6 +207,9 @@ class FlutterQuillLocalizationsHe extends FlutterQuillLocalizations {
 
   @override
   String get color => 'צבע';
+
+  @override
+  String get lineheight => 'גובה קו';
 
   @override
   String get findText => 'מצא טקסט';
@@ -290,4 +296,7 @@ class FlutterQuillLocalizationsHe extends FlutterQuillLocalizations {
 
   @override
   String get paste => 'Paste';
+
+  @override
+  String get insertTable => 'Insert table';
 }

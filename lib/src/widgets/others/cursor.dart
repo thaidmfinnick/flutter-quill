@@ -295,8 +295,7 @@ class CursorPainter {
         // Center the caret vertically along the text.
         caretRect = Rect.fromLTWH(
           caretRect.left,
-          // caretRect.top + (caretHeight - caretRect.height) / 2,
-          caretRect.top - 2,
+          caretRect.top + (caretHeight - caretRect.height) / 2,
           caretRect.width,
           caretRect.height,
         );

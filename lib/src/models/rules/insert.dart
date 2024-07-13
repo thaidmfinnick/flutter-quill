@@ -371,7 +371,7 @@ class AutoFormatMultipleLinksRule extends InsertRule {
       r'((https?:\/\/|www\.)[\w-\.]+\.[\w-\.]+(\/*([\S]+)?)?)|(wcake:\/\/i\/[A-Za-z0-9\+\/=\-\_]+)';
   static const _detectLinkPattern =
       // r'(\bhttps?:\/\/[\w\-]+(\.[\w\-]+)+[\w\-\.,@?^=%&:/~\+#\(\)]*[\w\-\@?^=%&/~\+#\(\)])';
-      r'(\bhttps?:\/\/[\w\.\-]+(:\d+)?(?:\/[^\/\s]*)*(?:\?[^\s]*)?(?:#[^\s]*)?)|(wcake:\/\/i\/[A-Za-z0-9\+\/=\-\_]+)';
+      r'(\bhttps?:\/\/[\w\.\-]+(:\d+)?(?:\/[^\/\s\`]*)*(?:\?[^\s]*)?(?:#[^\s]*)?)|(wcake:\/\/i\/[A-Za-z0-9\+\/=\-\_]+)';
 
   /// It requires a valid link in one link
   static final oneLineLinkRegExp = RegExp(

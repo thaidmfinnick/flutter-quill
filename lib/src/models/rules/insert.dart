@@ -332,7 +332,7 @@ class AutoFormatMultipleLinksRule extends InsertRule {
   // https://example.net/
   // URL generator tool (https://www.randomlists.com/urls) is used.
   static const _linkPattern =
-      r'((https?:\/\/|www\.)[\w-\.]+\.[\w-\.]+(\/*([\S]+)?)?)|(wcake:\/\/i\/[A-Za-z0-9\+\/=\-\_]+)';
+      r'(\bhttps?:\/\/[\w\.\-]+(:\d+)?(?:\/[^\/\s\`]*)*(?:\?[^\s]*)?(?:#[^\s]*)?)|(wcake:\/\/i\/[A-Za-z0-9\+\/=\-\_]+)';
       // r'(https?:\/\/|www\.)[\w-\.]+\.[\w-\.]+(\/*([\S]+)?)?';
   static final linkRegExp = RegExp(_linkPattern, caseSensitive: false);
 

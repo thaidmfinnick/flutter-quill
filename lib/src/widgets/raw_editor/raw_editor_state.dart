@@ -32,7 +32,6 @@ import '../../models/documents/nodes/line.dart';
 import '../../models/documents/nodes/node.dart';
 import '../../models/structs/offset_value.dart';
 import '../../models/structs/vertical_spacing.dart';
-import '../../utils/cast.dart';
 import '../../utils/delta.dart';
 import '../../utils/embeds.dart';
 import '../../utils/platform.dart';
@@ -590,7 +589,6 @@ class QuillRawEditorState extends EditorState
     // so if we ovveride the platform in material app theme data
     // it will not depend on it and doesn't change here but I don't think
     // we need to
-    final isDesktopMacOS = isMacOS(supportWeb: true);
 
     return TextFieldTapRegion(
       enabled: widget.configurations.isOnTapOutsideEnabled,
@@ -860,16 +858,6 @@ class QuillRawEditorState extends EditorState
             baseOffset: selection.baseOffset + chars,
             extentOffset: selection.baseOffset + chars),
         ChangeSource.local);
-  }
-
-  void _updateSelectionForKeyPhrase(String phrase, Attribute attribute) {
-    controller.replaceText(controller.selection.baseOffset - phrase.length,
-        phrase.length, '\n', null);
-    _moveCursor(-phrase.length);
-    controller
-      ..formatSelection(attribute)
-      // Remove the added newline.
-      ..replaceText(controller.selection.baseOffset + 1, 1, '', null);
   }
 
   void _handleSelectionChanged(

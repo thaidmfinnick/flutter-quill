@@ -281,6 +281,16 @@ class QuillController extends ChangeNotifier {
 
     Delta? delta;
     if (len > 0 || data is! String || data.isNotEmpty) {
+      if(len > 0 && index <= 1) {
+        final style = getSelectionStyle();
+
+        if(style.isBlock || style.isInline) {
+          final attribute = style.isInline ? Attribute.inlineCode : Attribute.codeBlock;
+          formatSelection(Attribute.clone(attribute, null));
+          selectStyle(attribute, false);
+        }
+      }
+
       delta = document.replace(index, len, data);
       var shouldRetainDelta = toggledStyle.isNotEmpty &&
           delta.isNotEmpty &&

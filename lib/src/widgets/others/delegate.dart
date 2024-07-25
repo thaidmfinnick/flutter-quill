@@ -197,6 +197,7 @@ class EditorTextSelectionGestureDetectorBuilder {
 
       if(selection.baseOffset == selection.extentOffset || !isInSelection) {
         onSingleTapUp(details);
+        shouldShowSelectionToolbar = true;
         renderEditor!.selectWord(SelectionChangedCause.tap);
       }
       // added to show toolbar by right click

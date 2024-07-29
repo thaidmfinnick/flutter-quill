@@ -281,10 +281,11 @@ class QuillController extends ChangeNotifier {
 
     Delta? delta;
     if (len > 0 || data is! String || data.isNotEmpty) {
-      if(len > 0 && index <= 1) {
+      if(len > 0) {
         final style = getSelectionStyle();
+        final isStyle = style.isBlock || style.isInline;
 
-        if(style.isBlock || style.isInline) {
+        if(isStyle && (data as String).trim().isEmpty) {
           final attribute = style.isInline ? Attribute.inlineCode : Attribute.codeBlock;
           formatSelection(Attribute.clone(attribute, null));
           selectStyle(attribute, false);

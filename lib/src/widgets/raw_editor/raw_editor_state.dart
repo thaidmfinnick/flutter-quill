@@ -125,11 +125,11 @@ class QuillRawEditorState extends EditorState
     _pasteStyleAndEmbed = controller.getAllIndividualSelectionStylesAndEmbed();
 
     final selection = textEditingValue.selection;
-    final text = textEditingValue.text.replaceAll('wcake://i/', 'https://pancakework.vn/api/i/');
+    final text = _pastePlainText.replaceAll('wcake://i/', 'https://pancakework.vn/api/i/');
     if (selection.isCollapsed) {
       return;
     }
-    Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+    Clipboard.setData(ClipboardData(text: text));
 
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);

@@ -281,14 +281,19 @@ class QuillController extends ChangeNotifier {
 
     Delta? delta;
     if (len > 0 || data is! String || data.isNotEmpty) {
+      final cStyle = document.collectStyle(index, len);
+
+      if(cStyle.isEmpty) {
+        toggledStyle = toggledStyle.put(Attribute.clone(Attribute.inlineCode, null));
+      }
+
       if(len > 0) {
         final style = getSelectionStyle();
-        final isStyle = style.isBlock || style.isInline;
+        final isSelectAll = selection.extentOffset - selection.baseOffset == plainTextEditingValue.text.length - 1;
 
-        if(isStyle && (data as String).trim().isEmpty) {
-          final attribute = style.isInline ? Attribute.inlineCode : Attribute.codeBlock;
-          formatSelection(Attribute.clone(attribute, null));
-          selectStyle(attribute, false);
+        if(style.isInline || isSelectAll) {
+          formatSelection(Attribute.clone(Attribute.inlineCode, null));
+          selectStyle(Attribute.inlineCode, false);
         }
       }
 
@@ -364,8 +369,7 @@ class QuillController extends ChangeNotifier {
     Attribute? attribute, {
     bool shouldNotifyListeners = true,
   }) {
-    if (len == 0 &&
-        attribute!.isInline &&
+    if (attribute!.isInline &&
         attribute.key != Attribute.link.key) {
       // Add the attribute to our toggledStyle.
       // It will be used later upon insertion.

@@ -778,9 +778,9 @@ class QuillRawEditorState extends EditorState
       return KeyEventResult.ignored;
     }
     // Handle indenting blocks when pressing the tab key.
-    if (event.logicalKey == LogicalKeyboardKey.tab) {
-      return _handleTabKey(event);
-    }
+    // if (event.logicalKey == LogicalKeyboardKey.tab) {
+    //   return _handleTabKey(event);
+    // }
 
     // Don't handle key if there is an active selection.
     if (controller.selection.baseOffset != controller.selection.extentOffset) {

@@ -285,11 +285,20 @@ class QuillController extends ChangeNotifier {
       final style = document.collectStyle(selection.start, selection.end - selection.start);
 
       final isInlineToggle = toggledStyle.attributes.values.any((e) {
-        return e.key == 'code' && e.value == true;
+        final inline = e.key == 'code' && e.value == true;
+        return inline;
       });
 
       if(style.isEmpty && isInlineToggle) {
         formatSelection(Attribute.clone(Attribute.inlineCode, null));
+      } else if(data is BlockEmbed) {
+        final isMention = toggledStyle.attributes.values.any((e) {
+          return e.key == 'mention';
+        });
+
+        if(isMention) {
+          formatSelection(Attribute.clone(toggledStyle.attributes.values.first, null));
+        }
       }
 
       if(len > 0) {

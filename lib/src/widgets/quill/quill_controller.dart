@@ -289,16 +289,26 @@ class QuillController extends ChangeNotifier {
         return inline;
       });
 
-      if(style.isEmpty && isInlineToggle) {
-        formatSelection(Attribute.clone(Attribute.inlineCode, null));
-      } else if(data is BlockEmbed) {
-        final isMention = toggledStyle.attributes.values.any((e) {
-          return e.key == 'mention';
-        });
+      if(style.isEmpty) {
+        if(isInlineToggle) {
+          formatSelection(Attribute.clone(Attribute.inlineCode, null));
+        } else {
+          final hasStyle = toggledStyle.attributes.values.any((e) {
+            return ['command', 'mention'].contains(e.key);
+          });
 
-        if(isMention) {
-          formatSelection(Attribute.clone(toggledStyle.attributes.values.first, null));
+          if(hasStyle) {
+            formatSelection(Attribute.clone(toggledStyle.attributes.values.first, null));
+          }
         }
+      // } else if(data is BlockEmbed) {
+      //   final isMention = toggledStyle.attributes.values.any((e) {
+      //     return e.key == 'mention';
+      //   });
+
+      //   if(isMention) {
+      //     formatSelection(Attribute.clone(toggledStyle.attributes.values.first, null));
+      //   }
       }
 
       if(len > 0) {

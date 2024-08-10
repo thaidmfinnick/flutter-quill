@@ -301,14 +301,6 @@ class QuillController extends ChangeNotifier {
             formatSelection(Attribute.clone(toggledStyle.attributes.values.first, null));
           }
         }
-      // } else if(data is BlockEmbed) {
-      //   final isMention = toggledStyle.attributes.values.any((e) {
-      //     return e.key == 'mention';
-      //   });
-
-      //   if(isMention) {
-      //     formatSelection(Attribute.clone(toggledStyle.attributes.values.first, null));
-      //   }
       }
 
       if(len > 0) {

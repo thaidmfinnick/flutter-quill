@@ -417,7 +417,7 @@ class AutoFormatMultipleLinksRule extends InsertRule {
     // Get word after insertion.
     final rightWordPart = entireText
         // Keep all text after insertion.
-        .substring(index)
+        .substring(index +(len ?? 0))
         // Keep first paragraph.
         .split('\n')
         .first
@@ -457,7 +457,7 @@ class AutoFormatMultipleLinksRule extends InsertRule {
     // Build base delta.
     // The base delta is a simple insertion delta.
     final baseDelta = Delta()
-      ..retain(index)
+      ..retain(index + (len ?? 0))
       ..insert(data);
 
     // Get unchanged text length.

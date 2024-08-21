@@ -337,7 +337,7 @@ class QuillRawEditorState extends EditorState
       onCut:
           cutEnabled ? () => cutSelection(SelectionChangedCause.toolbar) : null,
       onPaste:
-          pasteEnabled ? () => pasteText(SelectionChangedCause.toolbar) : null,
+          pasteEnabled && _clipboardStatus.value == ClipboardStatus.pasteable ? () => pasteText(SelectionChangedCause.toolbar) : null,
       onSelectAll: selectAllEnabled
           ? () => selectAll(SelectionChangedCause.toolbar)
           : null,

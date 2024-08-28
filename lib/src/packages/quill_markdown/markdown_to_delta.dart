@@ -82,6 +82,7 @@ class MarkdownToDelta extends Converter<String, Delta>
 
   final _elementToInlineAttr = <String, ElementToAttributeConvertor>{
     'em': (_) => [Attribute.italic],
+    'u': (_) => [Attribute.underline],
     'strong': (_) => [Attribute.bold],
     'del': (_) => [Attribute.strikeThrough],
     'a': (element) => [LinkAttribute(element.attributes['href'])],
@@ -91,6 +92,7 @@ class MarkdownToDelta extends Converter<String, Delta>
   final _elementToEmbed = <String, ElementToEmbeddableConvertor>{
     'hr': (_) => horizontalRule,
     'img': (elAttrs) => BlockEmbed.image(elAttrs['src'] ?? ''),
+    'video': (elAttrs) => BlockEmbed.video(elAttrs['src'] ?? '')
   };
 
   var _delta = Delta();
@@ -117,9 +119,7 @@ class MarkdownToDelta extends Converter<String, Delta>
     _justPreviousBlockExit = false;
     _listItemIndent = -1;
 
-    final lines = const LineSplitter().convert(input);
-    final mdNodes = markdownDocument.parseLines(lines);
-
+    final mdNodes = markdownDocument.parseInline(input);
     _topLevelNodes.addAll(mdNodes);
 
     for (final node in mdNodes) {

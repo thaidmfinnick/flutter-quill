@@ -128,6 +128,9 @@ class FlutterQuillLocalizationsPl extends FlutterQuillLocalizations {
   String get alignRight => 'Align right';
 
   @override
+  String get alignJustify => 'Align justify';
+
+  @override
   String get justifyWinWidth => 'Justify win width';
 
   @override
@@ -206,6 +209,9 @@ class FlutterQuillLocalizationsPl extends FlutterQuillLocalizations {
   String get color => 'Kolor';
 
   @override
+  String get lineheight => 'Wysokość linii';
+
+  @override
   String get findText => 'Find text';
 
   @override
@@ -219,6 +225,11 @@ class FlutterQuillLocalizationsPl extends FlutterQuillLocalizations {
 
   @override
   String get savedUsingLocalStorage => 'Saved using the local storage';
+
+  @override
+  String theImageHasBeenSavedAt(String imagePath) {
+    return 'The image has been saved at: $imagePath';
+  }
 
   @override
   String get errorWhileSavingImage => 'Error while saving image';
@@ -247,6 +258,12 @@ class FlutterQuillLocalizationsPl extends FlutterQuillLocalizations {
       'Czułość na wielkość liter i wyszukiwanie całego słowa';
 
   @override
+  String get caseSensitive => 'Case sensitive';
+
+  @override
+  String get wholeWord => 'Whole word';
+
+  @override
   String get insertImage => 'Wstaw obraz';
 
   @override
@@ -266,4 +283,19 @@ class FlutterQuillLocalizationsPl extends FlutterQuillLocalizations {
 
   @override
   String get pasteAVideoUsingALink => 'Paste a video using a link';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get searchSettings => 'Search settings';
+
+  @override
+  String get cut => 'Cut';
+
+  @override
+  String get paste => 'Paste';
+
+  @override
+  String get insertTable => 'Insert table';
 }

@@ -128,6 +128,9 @@ class FlutterQuillLocalizationsBg extends FlutterQuillLocalizations {
   String get alignRight => 'Подравни вдясно';
 
   @override
+  String get alignJustify => 'Align justify';
+
+  @override
   String get justifyWinWidth => 'Подравни във всяка колонка';
 
   @override
@@ -206,6 +209,9 @@ class FlutterQuillLocalizationsBg extends FlutterQuillLocalizations {
   String get color => 'Цвят';
 
   @override
+  String get lineheight => 'височина на линията';
+
+  @override
   String get findText => 'Намери текст';
 
   @override
@@ -219,6 +225,11 @@ class FlutterQuillLocalizationsBg extends FlutterQuillLocalizations {
 
   @override
   String get savedUsingLocalStorage => 'Saved using the local storage';
+
+  @override
+  String theImageHasBeenSavedAt(String imagePath) {
+    return 'The image has been saved at: $imagePath';
+  }
 
   @override
   String get errorWhileSavingImage => 'Error while saving image';
@@ -248,6 +259,12 @@ class FlutterQuillLocalizationsBg extends FlutterQuillLocalizations {
       'Чувствителност на кутията и търсене на цялата дума';
 
   @override
+  String get caseSensitive => 'Case sensitive';
+
+  @override
+  String get wholeWord => 'Whole word';
+
+  @override
   String get insertImage => 'Вмъкване на изображение';
 
   @override
@@ -267,4 +284,19 @@ class FlutterQuillLocalizationsBg extends FlutterQuillLocalizations {
 
   @override
   String get pasteAVideoUsingALink => 'Paste a video using a link';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get searchSettings => 'Search settings';
+
+  @override
+  String get cut => 'Cut';
+
+  @override
+  String get paste => 'Paste';
+
+  @override
+  String get insertTable => 'Insert table';
 }

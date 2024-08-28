@@ -1,28 +1,64 @@
 library flutter_quill_extensions;
 
-export 'embeds/embed_types.dart';
-export 'embeds/formula/toolbar/formula_button.dart';
-export 'embeds/image/editor/image_embed.dart';
-export 'embeds/image/editor/image_embed_types.dart';
-export 'embeds/image/editor/image_web_embed.dart';
-export 'embeds/image/toolbar/image_button.dart';
-export 'embeds/others/camera_button/camera_button.dart';
-export 'embeds/others/media_button/media_button.dart';
-export 'embeds/unknown/editor/unknown_embed.dart';
-export 'embeds/video/editor/video_embed.dart';
-export 'embeds/video/editor/video_web_embed.dart';
-export 'embeds/video/toolbar/video_button.dart';
-export 'embeds/video/video.dart';
-export 'extensions/controller_ext.dart';
-export 'flutter_quill_embeds.dart';
-export 'models/config/camera/camera_configurations.dart';
-export 'models/config/formula/formula_configurations.dart';
-export 'models/config/image/editor/image_configurations.dart';
-export 'models/config/image/editor/image_web_configurations.dart';
-export 'models/config/image/toolbar/image_configurations.dart';
-export 'models/config/media/media_button_configurations.dart';
-export 'models/config/shared_configurations.dart';
-export 'models/config/video/editor/video_configurations.dart';
-export 'models/config/video/editor/video_web_configurations.dart';
-export 'models/config/video/toolbar/video_configurations.dart';
-export 'utils/utils.dart';
+// ignore: implementation_imports
+import 'package:flutter_quill/src/editor_toolbar_controller_shared/clipboard/clipboard_service_provider.dart';
+import 'package:meta/meta.dart' show immutable;
+
+import 'src/editor_toolbar_controller_shared/clipboard/super_clipboard_service.dart';
+
+export 'src/common/extensions/controller_ext.dart';
+export 'src/common/utils/utils.dart';
+export 'src/editor/image/image_embed.dart';
+export 'src/editor/image/image_embed_types.dart';
+export 'src/editor/image/image_web_embed.dart';
+export 'src/editor/image/models/image_configurations.dart';
+export 'src/editor/image/models/image_web_configurations.dart';
+// TODO: Remove Simple Spell Checker Service
+export 'src/editor/spell_checker/simple_spell_checker_service.dart';
+export 'src/editor/table/table_cell_embed.dart';
+export 'src/editor/table/table_embed.dart';
+export 'src/editor/table/table_models.dart';
+export 'src/editor/video/models/video_configurations.dart';
+export 'src/editor/video/models/video_web_configurations.dart';
+export 'src/editor/video/models/youtube_video_support_mode.dart';
+export 'src/editor/video/video_embed.dart';
+export 'src/editor/video/video_web_embed.dart';
+export 'src/editor_toolbar_shared/shared_configurations.dart';
+export 'src/flutter_quill_embeds.dart';
+export 'src/toolbar/camera/camera_button.dart';
+export 'src/toolbar/camera/models/camera_configurations.dart';
+export 'src/toolbar/formula/formula_button.dart';
+export 'src/toolbar/formula/models/formula_configurations.dart';
+export 'src/toolbar/image/image_button.dart';
+export 'src/toolbar/image/models/image_configurations.dart';
+export 'src/toolbar/table/models/table_configurations.dart';
+export 'src/toolbar/table/table_button.dart';
+export 'src/toolbar/video/models/video.dart';
+export 'src/toolbar/video/models/video_configurations.dart';
+export 'src/toolbar/video/video_button.dart';
+
+@immutable
+class FlutterQuillExtensions {
+  const FlutterQuillExtensions._();
+
+  @Deprecated(
+    '''
+    Spell checker feature has been removed from the package to make it optional and 
+    reduce bundle size. See issue https://github.com/singerdmx/flutter-quill/issues/2142
+    for more details.
+
+    Calling this function will no longer activate the feature.
+    ''',
+  )
+  static void useSpellCheckerService(String language) {
+    // This feature has been removed from the package.
+    // See https://github.com/singerdmx/flutter-quill/issues/2142
+  }
+
+  /// Override default implementation of [ClipboardServiceProvider.instance]
+  /// to allow `flutter_quill` package to use `super_clipboard` plugin
+  /// to support rich text features, gif and images.
+  static void useSuperClipboardPlugin() {
+    ClipboardServiceProvider.setInstance(SuperClipboardService());
+  }
+}

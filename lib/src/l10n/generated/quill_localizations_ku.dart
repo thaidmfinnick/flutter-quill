@@ -128,6 +128,9 @@ class FlutterQuillLocalizationsKu extends FlutterQuillLocalizations {
   String get alignRight => 'بۆ ڕاست';
 
   @override
+  String get alignJustify => 'جوانکردن';
+
+  @override
   String get justifyWinWidth => 'پانی ڕێکبخە';
 
   @override
@@ -206,6 +209,9 @@ class FlutterQuillLocalizationsKu extends FlutterQuillLocalizations {
   String get color => 'ڕەنگ';
 
   @override
+  String get lineheight => 'بەرزی هێڵ';
+
+  @override
   String get findText => 'دۆزینەوەی نوسین';
 
   @override
@@ -219,6 +225,11 @@ class FlutterQuillLocalizationsKu extends FlutterQuillLocalizations {
 
   @override
   String get savedUsingLocalStorage => 'لە ڕێی دیسکی ناوخۆییەوە پاشەکەوتکرا';
+
+  @override
+  String theImageHasBeenSavedAt(String imagePath) {
+    return 'وێنەکە پاشەکەوت کرایە نێو';
+  }
 
   @override
   String get errorWhileSavingImage => 'هەڵە ڕویدا لە کاتی پاشەکەوتکردنی وێنەدا';
@@ -247,6 +258,12 @@ class FlutterQuillLocalizationsKu extends FlutterQuillLocalizations {
   String get caseSensitivityAndWholeWordSearch => 'گەڕان بۆ تەواوی وشە';
 
   @override
+  String get caseSensitive => 'هسەتیاری پیتی گەورە و بچووک';
+
+  @override
+  String get wholeWord => 'گشت ووشەکان';
+
+  @override
   String get insertImage => 'دانانی وێنە';
 
   @override
@@ -268,6 +285,21 @@ class FlutterQuillLocalizationsKu extends FlutterQuillLocalizations {
 
   @override
   String get pasteAVideoUsingALink => 'لینکی ڤیدیۆیەک دابنێ';
+
+  @override
+  String get close => 'دایخە';
+
+  @override
+  String get searchSettings => 'بە ناو ئامادەکارییەکاندا بگەڕێ';
+
+  @override
+  String get cut => 'بڕین';
+
+  @override
+  String get paste => 'دانان';
+
+  @override
+  String get insertTable => 'دانانی خشتە';
 }
 
 /// The translations for Kurdish (`ku_CKB`).
@@ -398,6 +430,9 @@ class FlutterQuillLocalizationsKuCkb extends FlutterQuillLocalizationsKu {
   String get alignRight => 'بۆ ڕاست';
 
   @override
+  String get alignJustify => 'جوانکردن';
+
+  @override
   String get justifyWinWidth => 'پانی ڕێکبخە';
 
   @override
@@ -476,6 +511,9 @@ class FlutterQuillLocalizationsKuCkb extends FlutterQuillLocalizationsKu {
   String get color => 'ڕەنگ';
 
   @override
+  String get lineheight => 'بەرزی هێڵ';
+
+  @override
   String get findText => 'دۆزینەوەی نوسین';
 
   @override
@@ -489,6 +527,11 @@ class FlutterQuillLocalizationsKuCkb extends FlutterQuillLocalizationsKu {
 
   @override
   String get savedUsingLocalStorage => 'لە ڕێی دیسکی ناوخۆییەوە پاشەکەوتکرا';
+
+  @override
+  String theImageHasBeenSavedAt(String imagePath) {
+    return 'وێنەکە پاشەکەوت کرایە نێو';
+  }
 
   @override
   String get errorWhileSavingImage => 'هەڵە ڕویدا لە کاتی پاشەکەوتکردنی وێنەدا';
@@ -517,6 +560,12 @@ class FlutterQuillLocalizationsKuCkb extends FlutterQuillLocalizationsKu {
   String get caseSensitivityAndWholeWordSearch => 'گەڕان بۆ تەواوی وشە';
 
   @override
+  String get caseSensitive => 'هسەتیاری پیتی گەورە و بچووک';
+
+  @override
+  String get wholeWord => 'گشت ووشەکان';
+
+  @override
   String get insertImage => 'دانانی وێنە';
 
   @override
@@ -538,4 +587,19 @@ class FlutterQuillLocalizationsKuCkb extends FlutterQuillLocalizationsKu {
 
   @override
   String get pasteAVideoUsingALink => 'لینکی ڤیدیۆیەک دابنێ';
+
+  @override
+  String get close => 'دایخە';
+
+  @override
+  String get searchSettings => 'بە ناو ئامادەکارییەکاندا بگەڕێ';
+
+  @override
+  String get cut => 'بڕین';
+
+  @override
+  String get paste => 'دانان';
+
+  @override
+  String get insertTable => 'دانانی خشتە';
 }

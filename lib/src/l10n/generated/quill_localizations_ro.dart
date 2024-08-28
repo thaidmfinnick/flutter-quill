@@ -128,6 +128,9 @@ class FlutterQuillLocalizationsRo extends FlutterQuillLocalizations {
   String get alignRight => 'Aliniază la dreapta';
 
   @override
+  String get alignJustify => 'Align justify';
+
+  @override
   String get justifyWinWidth => 'Justifică lățimea ferestrei';
 
   @override
@@ -206,6 +209,9 @@ class FlutterQuillLocalizationsRo extends FlutterQuillLocalizations {
   String get color => 'Culoare';
 
   @override
+  String get lineheight => 'Inaltimea liniei';
+
+  @override
   String get findText => 'Găsește text';
 
   @override
@@ -219,6 +225,11 @@ class FlutterQuillLocalizationsRo extends FlutterQuillLocalizations {
 
   @override
   String get savedUsingLocalStorage => 'Salvat în stocarea locală';
+
+  @override
+  String theImageHasBeenSavedAt(String imagePath) {
+    return 'The image has been saved at: $imagePath';
+  }
 
   @override
   String get errorWhileSavingImage => 'Eroare la salvarea imaginii';
@@ -250,6 +261,12 @@ class FlutterQuillLocalizationsRo extends FlutterQuillLocalizations {
       'Sensibilitate la majuscule și căutare cuvânt întreg';
 
   @override
+  String get caseSensitive => 'Case sensitive';
+
+  @override
+  String get wholeWord => 'Whole word';
+
+  @override
   String get insertImage => 'Introdu imaginea';
 
   @override
@@ -270,6 +287,21 @@ class FlutterQuillLocalizationsRo extends FlutterQuillLocalizations {
 
   @override
   String get pasteAVideoUsingALink => 'Lipește un video folosind un link';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get searchSettings => 'Search settings';
+
+  @override
+  String get cut => 'Cut';
+
+  @override
+  String get paste => 'Paste';
+
+  @override
+  String get insertTable => 'Insert table';
 }
 
 /// The translations for Romanian Moldavian Moldovan, as used in Romania (`ro_RO`).
@@ -476,6 +508,9 @@ class FlutterQuillLocalizationsRoRo extends FlutterQuillLocalizationsRo {
 
   @override
   String get color => 'Culoare';
+
+  @override
+  String get lineheight => 'Inaltimea liniei';
 
   @override
   String get findText => 'Găsește text';

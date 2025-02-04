@@ -192,6 +192,7 @@ class DefaultStyles {
     this.sizeSmall,
     this.sizeLarge,
     this.sizeHuge,
+    this.needRenderLeadingInBlock = false
   });
 
   final DefaultTextBlockStyle? h1;
@@ -223,6 +224,9 @@ class DefaultStyles {
   final DefaultTextBlockStyle? indent;
   final DefaultTextBlockStyle? align;
   final DefaultTextBlockStyle? leading;
+
+  /// custom: whether has leading in block
+  final bool needRenderLeadingInBlock;
 
   static DefaultStyles getInstance(BuildContext context) {
     final themeData = Theme.of(context);
@@ -458,6 +462,7 @@ class DefaultStyles {
       sizeSmall: other.sizeSmall ?? sizeSmall,
       sizeLarge: other.sizeLarge ?? sizeLarge,
       sizeHuge: other.sizeHuge ?? sizeHuge,
+      needRenderLeadingInBlock: other.needRenderLeadingInBlock
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'dart:async' show StreamSubscription, Completer;
 import 'dart:convert' show jsonDecode;
 import 'dart:math' as math;
-import 'dart:io';
 import 'dart:ui' as ui hide TextStyle;
 import 'package:flutter/services.dart';
 import 'package:collection/collection.dart';
@@ -1117,7 +1116,7 @@ class QuillRawEditorState extends EditorState
   @override
   void initState() {
     super.initState();
-    if (Platfrom.isIOS || Platfrom.isAndroid) {
+    if (isMobile(supportWeb: false)) {
       checkCanPasteTypeSupport();
       _streamPaste = const EventChannel('workcake.pancake.vn/events').receiveBroadcastStream().listen((call) async {
         try {

@@ -228,6 +228,7 @@ class QuillEditorState extends State<QuillEditor>
           child: QuillRawEditor(
             key: _editorKey,
             configurations: QuillRawEditorConfigurations(
+              listTypesSupportPaste: configurations.listTypesSupportPaste,
               controller: configurations.controller,
               focusNode: widget.focusNode,
               scrollController: widget.scrollController,

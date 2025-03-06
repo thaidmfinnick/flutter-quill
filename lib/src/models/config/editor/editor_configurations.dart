@@ -5,7 +5,7 @@ import 'package:flutter/material.dart'
     show TextCapitalization, TextInputAction, TextSelectionThemeData;
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart' show experimental;
-
+import 'package:super_clipboard/super_clipboard.dart';
 import '../../../widgets/editor/editor_builder.dart';
 import '../../../widgets/others/default_styles.dart';
 import '../../../widgets/others/delegate.dart';
@@ -76,6 +76,7 @@ class QuillEditorConfigurations extends Equatable {
     this.builder,
     this.magnifierConfiguration,
     this.textInputAction = TextInputAction.newline,
+    this.listTypesSupportPaste = const <SimpleFileFormat>[]
   });
 
   final QuillSharedConfigurations sharedConfigurations;
@@ -84,6 +85,8 @@ class QuillEditorConfigurations extends Equatable {
 
   /// The text placeholder in the quill editor
   final String? placeholder;
+
+  final List<SimpleFileFormat> listTypesSupportPaste;
 
   /// Whether the text can be changed.
   ///

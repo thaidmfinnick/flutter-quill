@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart' show Brightness, Uint8List;
+import 'package:super_clipboard/super_clipboard.dart';
 import 'package:flutter/material.dart'
     show
         AdaptiveTextSelectionToolbar,
@@ -77,8 +78,11 @@ class QuillRawEditorConfigurations extends Equatable {
     this.contentInsertionConfiguration,
     this.textInputAction = TextInputAction.newline,
     this.requestKeyboardFocusOnCheckListChanged = false,
+    this.listTypesSupportPaste = const <SimpleFileFormat>[]
   });
 
+  final List<SimpleFileFormat> listTypesSupportPaste;
+  
   /// Controls the document being edited.
   final QuillController controller;
 

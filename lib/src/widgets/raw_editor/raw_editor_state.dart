@@ -212,7 +212,7 @@ class QuillRawEditorState extends EditorState
     final onImagePaste = widget.configurations.onImagePaste;
     if (onImagePaste != null && typeCanPasteCurrent != null) {
       if (clipboard != null) {
-        Completer<bool> com = new Completer<bool>();
+        final com = Completer<bool>();
         final reader = await clipboard.read();
         if (!reader.canProvide(typeCanPasteCurrent!)) {
           com.complete(false);
@@ -235,7 +235,6 @@ class QuillRawEditorState extends EditorState
     if (clipboard != null) {
       // TODO: Bug, Doesn't replace the selected text, it just add a new one
       final reader = await clipboard.read();
-      print("___________________");
 
       if (reader.canProvide(Formats.htmlText)) {
         final html = await reader.readValue(Formats.htmlText);
@@ -244,11 +243,6 @@ class QuillRawEditorState extends EditorState
         }
         final htmlBody = html_parser.parse(html).body?.outerHtml;
         final deltaFromClipboard = Document.fromHtml(htmlBody ?? html);
-
-
-        print(htmlBody);
-        print("___________________+++++++++++++++++++++++++");
-
         var newDelta = Delta();
         newDelta = newDelta.compose(deltaFromClipboard);
         if (!controller.document.isEmpty()) {

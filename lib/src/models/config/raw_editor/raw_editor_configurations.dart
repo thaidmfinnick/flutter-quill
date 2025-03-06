@@ -78,9 +78,11 @@ class QuillRawEditorConfigurations extends Equatable {
     this.contentInsertionConfiguration,
     this.textInputAction = TextInputAction.newline,
     this.requestKeyboardFocusOnCheckListChanged = false,
-    this.listTypesSupportPaste = const <SimpleFileFormat>[]
+    this.listTypesSupportPaste = const <SimpleFileFormat>[],
+    this.streamCheckPaste
   });
 
+  final Stream? streamCheckPaste;
   final List<SimpleFileFormat> listTypesSupportPaste;
   
   /// Controls the document being edited.

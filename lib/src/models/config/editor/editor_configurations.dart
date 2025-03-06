@@ -76,8 +76,11 @@ class QuillEditorConfigurations extends Equatable {
     this.builder,
     this.magnifierConfiguration,
     this.textInputAction = TextInputAction.newline,
-    this.listTypesSupportPaste = const <SimpleFileFormat>[]
+    this.listTypesSupportPaste = const <SimpleFileFormat>[],
+    this.streamCheckPaste
   });
+
+  final Stream? streamCheckPaste;
 
   final QuillSharedConfigurations sharedConfigurations;
 

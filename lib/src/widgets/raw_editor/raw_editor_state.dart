@@ -1118,7 +1118,7 @@ class QuillRawEditorState extends EditorState
     super.initState();
     if (isMobile(supportWeb: false)) {
       checkCanPasteTypeSupport();
-      _streamPaste = const EventChannel('workcake.pancake.vn/events').receiveBroadcastStream().listen((call) async {
+      _streamPaste = widget.configurations.streamCheckPaste?.listen((call) async {
         try {
           final Map dataNative = jsonDecode(call);
           if (dataNative['type'] == 'changed_pasteboard') checkCanPasteTypeSupport();

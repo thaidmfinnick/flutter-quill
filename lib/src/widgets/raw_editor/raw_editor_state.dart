@@ -1,8 +1,8 @@
-import 'dart:async' show StreamSubscription;
+import 'dart:async' show StreamSubscription, Completer;
 import 'dart:convert' show jsonDecode;
 import 'dart:math' as math;
 import 'dart:ui' as ui hide TextStyle;
-
+import 'package:flutter/services.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
@@ -176,6 +176,7 @@ class QuillRawEditorState extends EditorState
     if (widget.configurations.readOnly) {
       return;
     }
+    final clipboard = SystemClipboard.instance;
 
     // When image copied internally in the editor
     final copiedImageUrl = controller.copiedImageUrl;
@@ -207,11 +208,35 @@ class QuillRawEditorState extends EditorState
       return;
     }
 
-    final clipboard = SystemClipboard.instance;
+
+    final onImagePaste = widget.configurations.onImagePaste;
+    if (onImagePaste != null && typeCanPasteCurrent != null) {
+      if (clipboard != null) {
+        Completer<bool> com = new Completer<bool>();
+        final reader = await clipboard.read();
+        if (!reader.canProvide(typeCanPasteCurrent!)) {
+          com.complete(false);
+        }
+        reader.getFile(typeCanPasteCurrent!, (value) async {
+          final imageUrl = await onImagePaste(await value.readAll());
+          if (imageUrl == null) {
+            com.complete(false);
+          } else {
+            com.complete(true);            
+          }
+        },
+        onError: (err) => com.complete(false)
+        );
+        if (await com.future) return;
+      }
+    }
+
 
     if (clipboard != null) {
       // TODO: Bug, Doesn't replace the selected text, it just add a new one
       final reader = await clipboard.read();
+      print("___________________");
+
       if (reader.canProvide(Formats.htmlText)) {
         final html = await reader.readValue(Formats.htmlText);
         if (html == null) {
@@ -219,6 +244,10 @@ class QuillRawEditorState extends EditorState
         }
         final htmlBody = html_parser.parse(html).body?.outerHtml;
         final deltaFromClipboard = Document.fromHtml(htmlBody ?? html);
+
+
+        print(htmlBody);
+        print("___________________+++++++++++++++++++++++++");
 
         var newDelta = Delta();
         newDelta = newDelta.compose(deltaFromClipboard);
@@ -282,31 +311,6 @@ class QuillRawEditorState extends EditorState
 
       return;
     }
-
-    final onImagePaste = widget.configurations.onImagePaste;
-    if (onImagePaste != null) {
-      if (clipboard != null) {
-        final reader = await clipboard.read();
-        if (!reader.canProvide(Formats.png)) {
-          return;
-        }
-        reader.getFile(Formats.png, (value) async {
-          final image = value;
-
-          final imageUrl = await onImagePaste(await image.readAll());
-          if (imageUrl == null) {
-            return;
-          }
-
-          controller.replaceText(
-            textEditingValue.selection.end,
-            0,
-            BlockEmbed.image(imageUrl),
-            null,
-          );
-        });
-      }
-    }
   }
 
   /// Select the entire text value.
@@ -337,7 +341,7 @@ class QuillRawEditorState extends EditorState
       onCut:
           cutEnabled ? () => cutSelection(SelectionChangedCause.toolbar) : null,
       onPaste:
-          pasteEnabled && _clipboardStatus.value == ClipboardStatus.pasteable ? () => pasteText(SelectionChangedCause.toolbar) : null,
+          (typeCanPasteCurrent != null) || (pasteEnabled && _clipboardStatus.value == ClipboardStatus.pasteable) ? () => pasteText(SelectionChangedCause.toolbar) : null,
       onSelectAll: selectAllEnabled
           ? () => selectAll(SelectionChangedCause.toolbar)
           : null,
@@ -1076,9 +1080,33 @@ class QuillRawEditorState extends EditorState
     _didChangeTextEditingValue(controller.ignoreFocusOnTextChange);
   }
 
+  late StreamSubscription _streamPaste;
+  SimpleFileFormat? typeCanPasteCurrent;
+  void checkCanPasteTypeSupport() {
+    typeCanPasteCurrent = null;
+    SystemClipboard.instance?.read().then((c) {
+      for (final type in widget.configurations.listTypesSupportPaste) {
+        if (c.canProvide(type)) {
+          typeCanPasteCurrent = type;
+        }
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    checkCanPasteTypeSupport();
+    _streamPaste = const EventChannel('workcake.pancake.vn/events').receiveBroadcastStream().listen((call) async {
+      try {
+        try {
+          final Map dataNative = jsonDecode(call);
+          if (dataNative['type'] == 'changed_pasteboard') checkCanPasteTypeSupport();
+        } catch (e, t) {
+          print('________$e, $t');
+        }
+      } catch (e) { }
+    });
 
     _clipboardStatus.addListener(_onChangedClipboardStatus);
 
@@ -1225,6 +1253,7 @@ class QuillRawEditorState extends EditorState
 
   @override
   void dispose() {
+    _streamPaste.cancel();
     closeConnectionIfNeeded();
     _keyboardVisibilitySubscription?.cancel();
     HardwareKeyboard.instance.removeHandler(_hardwareKeyboardEvent);

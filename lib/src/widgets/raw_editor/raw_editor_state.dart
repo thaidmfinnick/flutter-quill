@@ -1117,7 +1117,6 @@ class QuillRawEditorState extends EditorState
   void initState() {
     super.initState();
     if (isMobile(supportWeb: false)) {
-      checkCanPasteTypeSupport();
       _streamPaste = widget.configurations.streamCheckPaste?.listen((call) async {
         try {
           final Map dataNative = jsonDecode(call);

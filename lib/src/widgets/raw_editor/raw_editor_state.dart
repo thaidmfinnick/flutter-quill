@@ -212,14 +212,12 @@ class QuillRawEditorState extends EditorState
     if (clipboard != null) {
       // TODO: Bug, Doesn't replace the selected text, it just add a new one
       final reader = await clipboard.read();
-      if (reader.canProvide(Formats.htmlText)) {
-        final html = await reader.readValue(Formats.htmlText);
-        if (html == null) {
+      if (reader.canProvide(Formats.plainText)) {
+        final text = await reader.readValue(Formats.plainText);
+        if (text == null) {
           return;
         }
-        final htmlBody = html_parser.parse(html).body?.outerHtml;
-        final deltaFromClipboard = Document.fromHtml(htmlBody ?? html);
-
+        final deltaFromClipboard = Document().insert(0, '$text\n');
         var newDelta = Delta();
         newDelta = newDelta.compose(deltaFromClipboard);
         if (!controller.document.isEmpty()) {

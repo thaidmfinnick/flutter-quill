@@ -210,7 +210,6 @@ class QuillRawEditorState extends EditorState
 
 
     final onImagePaste = widget.configurations.onImagePaste;
-    /// start: xử lý case paste type rieng mobile
     if (onImagePaste != null && typeCanPasteCurrent != null) {
       if (clipboard != null) {
         final com = Completer<bool>();
@@ -231,7 +230,6 @@ class QuillRawEditorState extends EditorState
         if (await com.future) return;
       }
     }
-    /// end: xử lý case paste type rieng mobile
 
 
     if (clipboard != null) {
@@ -306,30 +304,6 @@ class QuillRawEditorState extends EditorState
       );
 
       return;
-    }
-    /// back lại case default(desktop)
-    if (onImagePaste != null) {
-      if (clipboard != null) {
-        final reader = await clipboard.read();
-        if (!reader.canProvide(Formats.png)) {
-          return;
-        }
-        reader.getFile(Formats.png, (value) async {
-          final image = value;
-
-          final imageUrl = await onImagePaste(await image.readAll());
-          if (imageUrl == null) {
-            return;
-          }
-
-          controller.replaceText(
-            textEditingValue.selection.end,
-            0,
-            BlockEmbed.image(imageUrl),
-            null,
-          );
-        });
-      }
     }
   }
 
@@ -1100,7 +1074,7 @@ class QuillRawEditorState extends EditorState
     _didChangeTextEditingValue(controller.ignoreFocusOnTextChange);
   }
 
-  StreamSubscription? _streamPaste;
+  late StreamSubscription _streamPaste;
   SimpleFileFormat? typeCanPasteCurrent;
   void checkCanPasteTypeSupport() {
     typeCanPasteCurrent = null;
@@ -1116,15 +1090,17 @@ class QuillRawEditorState extends EditorState
   @override
   void initState() {
     super.initState();
-    if (isMobile(supportWeb: false)) {
-      checkCanPasteTypeSupport();
-      _streamPaste = const EventChannel('workcake.pancake.vn/events').receiveBroadcastStream().listen((call) async {
+    checkCanPasteTypeSupport();
+    _streamPaste = const EventChannel('workcake.pancake.vn/events').receiveBroadcastStream().listen((call) async {
+      try {
         try {
           final Map dataNative = jsonDecode(call);
           if (dataNative['type'] == 'changed_pasteboard') checkCanPasteTypeSupport();
-        } catch (e) { }
-      });      
-    }
+        } catch (e, t) {
+          print('________$e, $t');
+        }
+      } catch (e) { }
+    });
 
     _clipboardStatus.addListener(_onChangedClipboardStatus);
 
@@ -1271,7 +1247,7 @@ class QuillRawEditorState extends EditorState
 
   @override
   void dispose() {
-    _streamPaste?.cancel();
+    _streamPaste.cancel();
     closeConnectionIfNeeded();
     _keyboardVisibilitySubscription?.cancel();
     HardwareKeyboard.instance.removeHandler(_hardwareKeyboardEvent);

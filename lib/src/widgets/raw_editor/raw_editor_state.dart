@@ -238,8 +238,8 @@ class QuillRawEditorState extends EditorState
       // TODO: Bug, Doesn't replace the selected text, it just add a new one
       final reader = await clipboard.read();
 
-      if (reader.canProvide(Formats.htmlText)) {
-        final html = await reader.readValue(Formats.htmlText);
+      if (reader.canProvide(Formats.plainText)) {
+        final html = await reader.readValue(Formats.plainText);
         if (html == null) {
           return;
         }

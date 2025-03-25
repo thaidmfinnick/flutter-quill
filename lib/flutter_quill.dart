@@ -21,6 +21,7 @@ export 'src/models/structs/optional_size.dart';
 export 'src/models/structs/vertical_spacing.dart';
 export 'src/models/themes/quill_dialog_theme.dart';
 export 'src/models/themes/quill_icon_theme.dart';
+export 'src/selection_area.dart';
 export 'src/utils/embeds.dart';
 export 'src/widgets/editor/editor.dart';
 export 'src/widgets/others/cursor.dart';

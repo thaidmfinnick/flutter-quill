@@ -35,6 +35,7 @@ class QuillEditorConfigurations extends Equatable {
     this.readOnly = false,
     this.textSelectionThemeData,
     this.showCursor,
+    this.cursorHeight,
     this.paintCursorAboveText,
     this.enableInteractiveSelection = true,
     this.enableSelectionToolbar = true,
@@ -327,6 +328,9 @@ class QuillEditorConfigurations extends Equatable {
   /// Default to [TextInputAction.newline]
   final TextInputAction textInputAction;
 
+  /// Using custom cursorHeight
+  final double? cursorHeight;
+
   @override
   List<Object?> get props => [
         placeholder,
@@ -383,6 +387,7 @@ class QuillEditorConfigurations extends Equatable {
     QuillEditorBuilder? builder,
     TextMagnifierConfiguration? magnifierConfiguration,
     TextInputAction? textInputAction,
+    double? cursorHeight
   }) {
     return QuillEditorConfigurations(
       sharedConfigurations: sharedConfigurations ?? this.sharedConfigurations,
@@ -442,6 +447,7 @@ class QuillEditorConfigurations extends Equatable {
       magnifierConfiguration:
           magnifierConfiguration ?? this.magnifierConfiguration,
       textInputAction: textInputAction ?? this.textInputAction,
+      cursorHeight: cursorHeight ?? this.cursorHeight
     );
   }
 }

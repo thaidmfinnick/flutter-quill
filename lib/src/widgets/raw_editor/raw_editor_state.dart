@@ -32,7 +32,6 @@ import '../../models/documents/nodes/line.dart';
 import '../../models/documents/nodes/node.dart';
 import '../../models/structs/offset_value.dart';
 import '../../models/structs/vertical_spacing.dart';
-import '../../utils/cast.dart';
 import '../../utils/delta.dart';
 import '../../utils/embeds.dart';
 import '../../utils/platform.dart';
@@ -126,11 +125,11 @@ class QuillRawEditorState extends EditorState
     _pasteStyleAndEmbed = controller.getAllIndividualSelectionStylesAndEmbed();
 
     final selection = textEditingValue.selection;
-    final text = textEditingValue.text;
+    final text = _pastePlainText.replaceAll('wcake://i/', 'https://pancakework.vn/api/i/');
     if (selection.isCollapsed) {
       return;
     }
-    Clipboard.setData(ClipboardData(text: selection.textInside(text)));
+    Clipboard.setData(ClipboardData(text: text));
 
     if (cause == SelectionChangedCause.toolbar) {
       bringIntoView(textEditingValue.selection.extent);
@@ -213,14 +212,12 @@ class QuillRawEditorState extends EditorState
     if (clipboard != null) {
       // TODO: Bug, Doesn't replace the selected text, it just add a new one
       final reader = await clipboard.read();
-      if (reader.canProvide(Formats.htmlText)) {
-        final html = await reader.readValue(Formats.htmlText);
-        if (html == null) {
+      if (reader.canProvide(Formats.plainText)) {
+        final text = await reader.readValue(Formats.plainText);
+        if (text == null) {
           return;
         }
-        final htmlBody = html_parser.parse(html).body?.outerHtml;
-        final deltaFromClipboard = Document.fromHtml(htmlBody ?? html);
-
+        final deltaFromClipboard = Document().insert(0, '$text\n');
         var newDelta = Delta();
         newDelta = newDelta.compose(deltaFromClipboard);
         if (!controller.document.isEmpty()) {
@@ -338,7 +335,7 @@ class QuillRawEditorState extends EditorState
       onCut:
           cutEnabled ? () => cutSelection(SelectionChangedCause.toolbar) : null,
       onPaste:
-          pasteEnabled ? () => pasteText(SelectionChangedCause.toolbar) : null,
+          pasteEnabled && _clipboardStatus.value == ClipboardStatus.pasteable ? () => pasteText(SelectionChangedCause.toolbar) : null,
       onSelectAll: selectAllEnabled
           ? () => selectAll(SelectionChangedCause.toolbar)
           : null,
@@ -590,7 +587,6 @@ class QuillRawEditorState extends EditorState
     // so if we ovveride the platform in material app theme data
     // it will not depend on it and doesn't change here but I don't think
     // we need to
-    final isDesktopMacOS = isMacOS(supportWeb: true);
 
     return TextFieldTapRegion(
       enabled: widget.configurations.isOnTapOutsideEnabled,
@@ -607,146 +603,146 @@ class QuillRawEditorState extends EditorState
         child: Shortcuts(
           shortcuts: mergeMaps<ShortcutActivator, Intent>({
             // shortcuts added for Desktop platforms.
-            const SingleActivator(
-              LogicalKeyboardKey.escape,
-            ): const HideSelectionToolbarIntent(),
-            SingleActivator(
-              LogicalKeyboardKey.keyZ,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const UndoTextIntent(SelectionChangedCause.keyboard),
-            SingleActivator(
-              LogicalKeyboardKey.keyY,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const RedoTextIntent(SelectionChangedCause.keyboard),
+            // const SingleActivator(
+            //   LogicalKeyboardKey.escape,
+            // ): const HideSelectionToolbarIntent(),
+            // SingleActivator(
+            //   LogicalKeyboardKey.keyZ,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const UndoTextIntent(SelectionChangedCause.keyboard),
+            // SingleActivator(
+            //   LogicalKeyboardKey.keyY,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const RedoTextIntent(SelectionChangedCause.keyboard),
 
-            // Selection formatting.
-            SingleActivator(
-              LogicalKeyboardKey.keyB,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const ToggleTextStyleIntent(Attribute.bold),
-            SingleActivator(
-              LogicalKeyboardKey.keyU,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const ToggleTextStyleIntent(Attribute.underline),
-            SingleActivator(
-              LogicalKeyboardKey.keyI,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const ToggleTextStyleIntent(Attribute.italic),
-            SingleActivator(
-              LogicalKeyboardKey.keyS,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-              shift: true,
-            ): const ToggleTextStyleIntent(Attribute.strikeThrough),
-            SingleActivator(
-              LogicalKeyboardKey.backquote,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const ToggleTextStyleIntent(Attribute.inlineCode),
-            SingleActivator(
-              LogicalKeyboardKey.tilde,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-              shift: true,
-            ): const ToggleTextStyleIntent(Attribute.codeBlock),
-            SingleActivator(
-              LogicalKeyboardKey.keyB,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-              shift: true,
-            ): const ToggleTextStyleIntent(Attribute.blockQuote),
-            SingleActivator(
-              LogicalKeyboardKey.keyK,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const QuillEditorApplyLinkIntent(),
+            // // Selection formatting.
+            // SingleActivator(
+            //   LogicalKeyboardKey.keyB,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const ToggleTextStyleIntent(Attribute.bold),
+            // SingleActivator(
+            //   LogicalKeyboardKey.keyU,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const ToggleTextStyleIntent(Attribute.underline),
+            // SingleActivator(
+            //   LogicalKeyboardKey.keyI,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const ToggleTextStyleIntent(Attribute.italic),
+            // SingleActivator(
+            //   LogicalKeyboardKey.keyS,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            //   shift: true,
+            // ): const ToggleTextStyleIntent(Attribute.strikeThrough),
+            // SingleActivator(
+            //   LogicalKeyboardKey.backquote,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const ToggleTextStyleIntent(Attribute.inlineCode),
+            // SingleActivator(
+            //   LogicalKeyboardKey.tilde,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            //   shift: true,
+            // ): const ToggleTextStyleIntent(Attribute.codeBlock),
+            // SingleActivator(
+            //   LogicalKeyboardKey.keyB,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            //   shift: true,
+            // ): const ToggleTextStyleIntent(Attribute.blockQuote),
+            // SingleActivator(
+            //   LogicalKeyboardKey.keyK,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const QuillEditorApplyLinkIntent(),
 
-            // Lists
-            SingleActivator(
-              LogicalKeyboardKey.keyL,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-              shift: true,
-            ): const ToggleTextStyleIntent(Attribute.ul),
-            SingleActivator(
-              LogicalKeyboardKey.keyO,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-              shift: true,
-            ): const ToggleTextStyleIntent(Attribute.ol),
-            SingleActivator(
-              LogicalKeyboardKey.keyC,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-              shift: true,
-            ): const QuillEditorApplyCheckListIntent(),
+            // // Lists
+            // SingleActivator(
+            //   LogicalKeyboardKey.keyL,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            //   shift: true,
+            // ): const ToggleTextStyleIntent(Attribute.ul),
+            // SingleActivator(
+            //   LogicalKeyboardKey.keyO,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            //   shift: true,
+            // ): const ToggleTextStyleIntent(Attribute.ol),
+            // SingleActivator(
+            //   LogicalKeyboardKey.keyC,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            //   shift: true,
+            // ): const QuillEditorApplyCheckListIntent(),
 
-            // Indents
-            SingleActivator(
-              LogicalKeyboardKey.keyM,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const IndentSelectionIntent(true),
-            SingleActivator(
-              LogicalKeyboardKey.keyM,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-              shift: true,
-            ): const IndentSelectionIntent(false),
+            // // Indents
+            // SingleActivator(
+            //   LogicalKeyboardKey.keyM,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const IndentSelectionIntent(true),
+            // SingleActivator(
+            //   LogicalKeyboardKey.keyM,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            //   shift: true,
+            // ): const IndentSelectionIntent(false),
 
-            // Headers
-            SingleActivator(
-              LogicalKeyboardKey.digit1,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const QuillEditorApplyHeaderIntent(Attribute.h1),
-            SingleActivator(
-              LogicalKeyboardKey.digit2,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const QuillEditorApplyHeaderIntent(Attribute.h2),
-            SingleActivator(
-              LogicalKeyboardKey.digit3,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const QuillEditorApplyHeaderIntent(Attribute.h3),
-            SingleActivator(
-              LogicalKeyboardKey.digit4,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const QuillEditorApplyHeaderIntent(Attribute.h4),
-            SingleActivator(
-              LogicalKeyboardKey.digit5,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const QuillEditorApplyHeaderIntent(Attribute.h5),
-            SingleActivator(
-              LogicalKeyboardKey.digit6,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const QuillEditorApplyHeaderIntent(Attribute.h6),
-            SingleActivator(
-              LogicalKeyboardKey.digit0,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const QuillEditorApplyHeaderIntent(Attribute.header),
+            // // Headers
+            // SingleActivator(
+            //   LogicalKeyboardKey.digit1,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const QuillEditorApplyHeaderIntent(Attribute.h1),
+            // SingleActivator(
+            //   LogicalKeyboardKey.digit2,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const QuillEditorApplyHeaderIntent(Attribute.h2),
+            // SingleActivator(
+            //   LogicalKeyboardKey.digit3,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const QuillEditorApplyHeaderIntent(Attribute.h3),
+            // SingleActivator(
+            //   LogicalKeyboardKey.digit4,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const QuillEditorApplyHeaderIntent(Attribute.h4),
+            // SingleActivator(
+            //   LogicalKeyboardKey.digit5,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const QuillEditorApplyHeaderIntent(Attribute.h5),
+            // SingleActivator(
+            //   LogicalKeyboardKey.digit6,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const QuillEditorApplyHeaderIntent(Attribute.h6),
+            // SingleActivator(
+            //   LogicalKeyboardKey.digit0,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const QuillEditorApplyHeaderIntent(Attribute.header),
 
-            SingleActivator(
-              LogicalKeyboardKey.keyG,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const QuillEditorInsertEmbedIntent(Attribute.image),
+            // SingleActivator(
+            //   LogicalKeyboardKey.keyG,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const QuillEditorInsertEmbedIntent(Attribute.image),
 
-            SingleActivator(
-              LogicalKeyboardKey.keyF,
-              control: !isDesktopMacOS,
-              meta: isDesktopMacOS,
-            ): const OpenSearchIntent(),
+            // SingleActivator(
+            //   LogicalKeyboardKey.keyF,
+            //   control: !isDesktopMacOS,
+            //   meta: isDesktopMacOS,
+            // ): const OpenSearchIntent(),
           }, {
             ...?widget.configurations.customShortcuts
           }),
@@ -780,53 +776,16 @@ class QuillRawEditorState extends EditorState
       return KeyEventResult.ignored;
     }
     // Handle indenting blocks when pressing the tab key.
-    if (event.logicalKey == LogicalKeyboardKey.tab) {
-      return _handleTabKey(event);
-    }
+    // if (event.logicalKey == LogicalKeyboardKey.tab) {
+    //   return _handleTabKey(event);
+    // }
 
     // Don't handle key if there is an active selection.
     if (controller.selection.baseOffset != controller.selection.extentOffset) {
       return KeyEventResult.ignored;
     }
 
-    // Handle inserting lists when space is pressed following
-    // a list initiating phrase.
-    if (event.logicalKey == LogicalKeyboardKey.space) {
-      return _handleSpaceKey(event);
-    }
-
     return KeyEventResult.ignored;
-  }
-
-  KeyEventResult _handleSpaceKey(RawKeyEvent event) {
-    final child =
-        controller.document.queryChild(controller.selection.baseOffset);
-    if (child.node == null) {
-      return KeyEventResult.ignored;
-    }
-
-    final line = child.node as Line?;
-    if (line == null) {
-      return KeyEventResult.ignored;
-    }
-
-    final text = castOrNull<leaf.QuillText>(line.first);
-    if (text == null) {
-      return KeyEventResult.ignored;
-    }
-
-    const olKeyPhrase = '1.';
-    const ulKeyPhrase = '-';
-
-    if (text.value == olKeyPhrase) {
-      _updateSelectionForKeyPhrase(olKeyPhrase, Attribute.ol);
-    } else if (text.value == ulKeyPhrase) {
-      _updateSelectionForKeyPhrase(ulKeyPhrase, Attribute.ul);
-    } else {
-      return KeyEventResult.ignored;
-    }
-
-    return KeyEventResult.handled;
   }
 
   KeyEventResult _handleTabKey(RawKeyEvent event) {
@@ -897,16 +856,6 @@ class QuillRawEditorState extends EditorState
             baseOffset: selection.baseOffset + chars,
             extentOffset: selection.baseOffset + chars),
         ChangeSource.local);
-  }
-
-  void _updateSelectionForKeyPhrase(String phrase, Attribute attribute) {
-    controller.replaceText(controller.selection.baseOffset - phrase.length,
-        phrase.length, '\n', null);
-    _moveCursor(-phrase.length);
-    controller
-      ..formatSelection(attribute)
-      // Remove the added newline.
-      ..replaceText(controller.selection.baseOffset + 1, 1, '', null);
   }
 
   void _handleSelectionChanged(
@@ -1676,6 +1625,13 @@ class QuillRawEditorState extends EditorState
       false,
       _characterBoundary,
     )),
+    // Extend/Move Selection
+    ExpandSelectionToLineBreakIntent: _makeOverridable(
+        CallbackAction<ExpandSelectionToLineBreakIntent>(onInvoke: _expandSelectionToLinebreak)),
+    ExpandSelectionToDocumentBoundaryIntent: _makeOverridable(
+        CallbackAction<ExpandSelectionToDocumentBoundaryIntent>(onInvoke: _expandSelectionToDocumentBoundary)),
+    ScrollToDocumentBoundaryIntent: _makeOverridable(
+        CallbackAction<ScrollToDocumentBoundaryIntent>(onInvoke: _scrollToDocumentBoundary)),
     ExtendSelectionToNextWordBoundaryIntent: _makeOverridable(
         QuillEditorUpdateTextSelectionAction<
                 ExtendSelectionToNextWordBoundaryIntent>(
@@ -1714,6 +1670,49 @@ class QuillRawEditorState extends EditorState
     QuillEditorApplyCheckListIntent: _applyCheckListAction,
     QuillEditorApplyLinkIntent: QuillEditorApplyLinkAction(this)
   };
+
+  void _expandSelectionToLinebreak(ExpandSelectionToLineBreakIntent intent) {
+    final textBoundary = _linebreak(intent);
+    _expandSelection(intent.forward, textBoundary);
+  }
+
+  void _expandSelection(bool forward, textBoundary,
+    [bool extentAtIndex = false]) {
+    final textBoundarySelection = textBoundary.textEditingValue.selection;
+    if (!textBoundarySelection.isValid) {
+      return;
+    }
+
+    final inOrder = textBoundarySelection.baseOffset <= textBoundarySelection.extentOffset;
+    final towardsExtent = forward == inOrder;
+    final position = towardsExtent
+        ? textBoundarySelection.extent
+        : textBoundarySelection.base;
+
+    final newExtent = forward
+      ? textBoundary.getTrailingTextBoundaryAt(position)
+      : textBoundary.getLeadingTextBoundaryAt(position);
+
+    final newSelection = textBoundarySelection.expandTo(newExtent, textBoundarySelection.isCollapsed || extentAtIndex);
+    userUpdateTextEditingValue(
+      textEditingValue.copyWith(selection: newSelection),
+      SelectionChangedCause.keyboard,
+    );
+    bringIntoView(newSelection.extent);
+  }
+
+  void _expandSelectionToDocumentBoundary(ExpandSelectionToDocumentBoundaryIntent intent) {
+    final textBoundary = _documentBoundary(intent);
+    _expandSelection(intent.forward, textBoundary, true);
+  }
+
+  void _scrollToDocumentBoundary(ScrollToDocumentBoundaryIntent intent) {
+    if (intent.forward) {
+      bringIntoView(TextPosition(offset: textEditingValue.text.length));
+    } else {
+      bringIntoView(const TextPosition(offset: 0));
+    }
+  }
 
   @override
   void insertTextPlaceholder(Size size) {

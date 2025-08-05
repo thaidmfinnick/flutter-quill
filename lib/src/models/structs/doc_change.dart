@@ -9,6 +9,7 @@ class DocChange {
     this.before,
     this.change,
     this.source,
+    this.position
   );
 
   /// Document state before [change].
@@ -19,4 +20,6 @@ class DocChange {
 
   /// The source of this change.
   final ChangeSource source;
+
+  final int position;
 }

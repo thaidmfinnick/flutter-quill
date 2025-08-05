@@ -250,6 +250,7 @@ class QuillEditorState extends State<QuillEditor>
                 color: cursorColor,
                 backgroundColor: Colors.grey,
                 width: 2,
+                height: configurations.cursorHeight,
                 radius: cursorRadius,
                 offset: cursorOffset,
                 paintAboveText:
@@ -842,7 +843,11 @@ class RenderEditor extends RenderEditableContainerBox
 
   @override
   void handleTapDown(TapDownDetails details) {
-    _lastTapDownPosition = details.globalPosition;
+    setLastTap(details.globalPosition);
+  }
+
+  void setLastTap(Offset offset) {
+    _lastTapDownPosition = offset;
   }
 
   bool _isDragging = false;
@@ -1139,6 +1144,12 @@ class RenderEditor extends RenderEditableContainerBox
       offset: localPosition.offset + child.container.offset,
       affinity: localPosition.affinity,
     );
+  }
+
+  Offset getOffsetForPosition(TextPosition textPosition) {
+    final caretOffset = _getOffsetForCaret(textPosition);
+
+    return localToGlobal(caretOffset + _paintOffset);
   }
 
   /// Returns the y-offset of the editor at which [selection] is visible.

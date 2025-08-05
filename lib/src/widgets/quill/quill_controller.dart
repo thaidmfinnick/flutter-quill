@@ -59,7 +59,7 @@ class QuillController extends ChangeNotifier {
   }) {
     final newDocument = Document.fromDelta(delta);
 
-    final change = DocChange(_document.toDelta(), delta, changeSource);
+    final change = DocChange(_document.toDelta(), delta, changeSource, 0);
     newDocument.documentChangeObserver.add(change);
     newDocument.history.handleDocChange(change);
 
@@ -238,37 +238,21 @@ class QuillController extends ChangeNotifier {
   }
 
   void undo() {
-    final result = document.undo();
-    if (result.changed) {
-      _handleHistoryChange(result.len);
-    }
+    document.undo(_handleHistoryChange);
   }
 
-  void _handleHistoryChange(int? len) {
-    if (len! != 0) {
-      // if (this.selection.extentOffset >= document.length) {
-      // // cursor exceeds the length of document, position it in the end
-      // updateSelection(
-      // TextSelection.collapsed(offset: document.length), ChangeSource.LOCAL);
+  void _handleHistoryChange(int pos) {
+    if (pos != 0) {
       updateSelection(
-        (selection.baseOffset + len) > 0
-            ? TextSelection.collapsed(
-                offset: selection.baseOffset + len,
-              )
-            : TextSelection.collapsed(offset: document.length),
-        ChangeSource.local,
-      );
+          TextSelection.collapsed(offset: pos),
+          ChangeSource.local);
     } else {
       // no need to move cursor
-      notifyListeners();
     }
   }
 
   void redo() {
-    final result = document.redo();
-    if (result.changed) {
-      _handleHistoryChange(result.len);
-    }
+    document.redo(_handleHistoryChange);
   }
 
   bool get hasUndo => document.hasUndo;
@@ -297,6 +281,41 @@ class QuillController extends ChangeNotifier {
 
     Delta? delta;
     if (len > 0 || data is! String || data.isNotEmpty) {
+      final styles = getAllSelectionStyles();
+      final style = document.collectStyle(selection.start, selection.end - selection.start);
+
+      final isInlineToggle = toggledStyle.attributes.values.any((e) {
+        final inline = e.key == 'code' && e.value == true;
+        return inline;
+      });
+
+      if(style.isEmpty) {
+        if(isInlineToggle) {
+          formatSelection(Attribute.clone(Attribute.inlineCode, null));
+        } else {
+          final hasStyle = toggledStyle.attributes.values.any((e) {
+            return ['command', 'mention'].contains(e.key);
+          });
+
+          if(hasStyle) {
+            formatSelection(Attribute.clone(toggledStyle.attributes.values.first, null));
+          }
+        }
+      }
+
+      if(len > 0) {
+        final isInline = styles.any((style) {
+          return style.attributes.values.any((e) {
+            return e.key == 'code' && e.value == true;
+          });
+        });
+
+        if(isInline) {
+          formatSelection(Attribute.clone(Attribute.inlineCode, null));
+          selectStyle(Attribute.inlineCode, false);
+        }
+      }
+
       delta = document.replace(index, len, data);
       var shouldRetainDelta = toggledStyle.isNotEmpty &&
           delta.isNotEmpty &&
@@ -369,8 +388,9 @@ class QuillController extends ChangeNotifier {
     Attribute? attribute, {
     bool shouldNotifyListeners = true,
   }) {
-    if (len == 0 &&
-        attribute!.isInline &&
+    if (
+      attribute!.isInline &&
+      (len == 0 || index == 0) &&
         attribute.key != Attribute.link.key) {
       // Add the attribute to our toggledStyle.
       // It will be used later upon insertion.

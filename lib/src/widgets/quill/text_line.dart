@@ -76,7 +76,11 @@ class _TextLineState extends State<TextLine> {
     if (_metaOrControlPressed != newValue) {
       setState(() {
         _metaOrControlPressed = newValue;
-        _richTextKey = UniqueKey();
+        _linkRecognizers
+          ..forEach((key, value) {
+            value.dispose();
+          })
+          ..clear();
       });
     }
   }
@@ -455,7 +459,7 @@ class _TextLineState extends State<TextLine> {
     }
 
     if (isLink && canLaunchLinks) {
-      if (isDesktop(supportWeb: true) || widget.readOnly) {
+      if (widget.readOnly) {
         _linkRecognizers[segment] = TapGestureRecognizer()
           ..onTap = () => _tapNodeLink(segment);
       } else {
@@ -920,7 +924,7 @@ class RenderEditableTextLine extends RenderEditableBox {
     if (isIOS(supportWeb: true)) {
       _caretPrototype = Rect.fromLTWH(0, 0, cursorWidth, cursorHeight + 2);
     } else {
-      _caretPrototype = Rect.fromLTWH(0, 2, cursorWidth, cursorHeight - 4.0);
+      _caretPrototype = Rect.fromLTWH(0, 0, 1.5, cursorHeight - 1);
     }
   }
 

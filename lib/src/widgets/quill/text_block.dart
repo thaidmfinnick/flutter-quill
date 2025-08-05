@@ -138,6 +138,7 @@ class EditableTextBlock extends StatelessWidget {
   List<Widget> _buildChildren(BuildContext context,
       Map<int, int> indentLevelCounts, bool clearIndents) {
     final defaultStyles = QuillStyles.getStyles(context, false);
+    final needRenderLeading = defaultStyles != null ? defaultStyles.needRenderLeadingInBlock : false;
     final count = block.children.length;
     final children = <Widget>[];
     if (clearIndents) {
@@ -148,13 +149,15 @@ class EditableTextBlock extends StatelessWidget {
       index++;
       final editableTextLine = EditableTextLine(
         line,
-        _buildLeading(
+        needRenderLeading 
+        ? _buildLeading(
           context: context,
           line: line,
           index: index,
           indentLevelCounts: indentLevelCounts,
           count: count,
-        ),
+        )
+        : Container(),
         TextLine(
           line: line,
           textDirection: textDirection,

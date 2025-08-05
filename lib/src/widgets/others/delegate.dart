@@ -168,7 +168,7 @@ class EditorTextSelectionGestureDetectorBuilder {
       SelectionChangedCause.forcePress,
     );
     if (shouldShowSelectionToolbar) {
-      editor!.showToolbar();
+      // editor!.showToolbar();
     }
   }
 
@@ -190,10 +190,28 @@ class EditorTextSelectionGestureDetectorBuilder {
   /// onSingleTapUp for mouse right click
   @protected
   void onSecondarySingleTapUp(TapUpDetails details) {
-    // added to show toolbar by right click
-    if (shouldShowSelectionToolbar) {
-      editor!.showToolbar();
+    if(delegate.selectionEnabled) {
+      final selection = renderEditor!.selection;
+      final pos = renderEditor!.getPositionForOffset(details.globalPosition);
+      final isInSelection = pos.offset >= selection.baseOffset && pos.offset <= selection.extentOffset;
+
+      if(selection.baseOffset == selection.extentOffset || !isInSelection) {
+        onSingleTapUp(details);
+        shouldShowSelectionToolbar = true;
+        renderEditor!.selectWord(SelectionChangedCause.tap);
+      }
+      // added to show toolbar by right click
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (shouldShowSelectionToolbar) {
+          editor!.showToolbar();
+        }
+      });
     }
+  }
+
+  @protected
+  void onSecondaryTapDown(TapDownDetails details) {
+    renderEditor!.handleTapDown(details);
   }
 
   /// Handler for [EditorTextSelectionGestureDetector.onSingleTapCancel].
@@ -282,7 +300,7 @@ class EditorTextSelectionGestureDetectorBuilder {
       // have focus, selection hasn't been set when the toolbars
       // get added
       SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (shouldShowSelectionToolbar) {
+        if (shouldShowSelectionToolbar && isMobile(supportWeb: true)) {
           editor!.showToolbar();
         }
       });
@@ -336,7 +354,7 @@ class EditorTextSelectionGestureDetectorBuilder {
         delegate.selectionEnabled &&
         shouldShowSelectionToolbar) {
       // added to show selection copy/paste toolbar after drag to select
-      editor!.showToolbar();
+      // editor!.showToolbar();
     }
   }
 
@@ -362,6 +380,7 @@ class EditorTextSelectionGestureDetectorBuilder {
       onSingleLongTapEnd: onSingleLongTapEnd,
       onDoubleTapDown: onDoubleTapDown,
       onSecondarySingleTapUp: onSecondarySingleTapUp,
+      onSecondaryTapDown: onSecondaryTapDown,
       onDragSelectionStart: onDragSelectionStart,
       onDragSelectionUpdate: onDragSelectionUpdate,
       onDragSelectionEnd: onDragSelectionEnd,

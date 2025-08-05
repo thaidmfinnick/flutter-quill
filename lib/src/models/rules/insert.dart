@@ -160,13 +160,15 @@ class AutoExitBlockRule extends InsertRule {
   const AutoExitBlockRule();
 
   bool _isEmptyLine(Operation? before, Operation? after) {
-    if (before == null) {
-      return true;
-    }
-    return before.data is String &&
-        (before.data as String).endsWith('\n') &&
-        after!.data is String &&
-        (after.data as String).startsWith('\n');
+    // check neu dong rong hoac null thi xuong nhung khong can
+    return false;
+    // if (before == null) {
+    //   return true;
+    // }
+    // return before.data is String &&
+    //     (before.data as String).endsWith('\n') &&
+    //     after!.data is String &&
+    //     (after.data as String).startsWith('\n');
   }
 
   @override
@@ -366,9 +368,10 @@ class AutoFormatMultipleLinksRule extends InsertRule {
   // URL generator tool (https://www.randomlists.com/urls) is used.
 
   static const _oneLineLinkPattern =
-      r'^https?:\/\/[\w\-]+(\.[\w\-]+)*(:\d+)?(\/.*)?$';
+      r'((https?:\/\/|www\.)[\w-\.]+\.[\w-\.]+(\/*([\S]+)?)?)|(wcake:\/\/i\/[A-Za-z0-9\+\/=\-\_]+)';
   static const _detectLinkPattern =
-      r'https?:\/\/[\w\-]+(\.[\w\-]+)*(:\d+)?(\/[^\s]*)?';
+      // r'(\bhttps?:\/\/[\w\-]+(\.[\w\-]+)+[\w\-\.,@?^=%&:/~\+#\(\)]*[\w\-\@?^=%&/~\+#\(\)])';
+      r'(\bhttps?:\/\/[\w\.\-]+(:\d+)?(?:\/[^\/\s\`]*)*(?:\?[^\s]*)?(?:#[^\s]*)?)|(wcake:\/\/i\/[A-Za-z0-9\+\/=\-\_]+)';
 
   /// It requires a valid link in one link
   static final oneLineLinkRegExp = RegExp(
@@ -414,7 +417,7 @@ class AutoFormatMultipleLinksRule extends InsertRule {
     // Get word after insertion.
     final rightWordPart = entireText
         // Keep all text after insertion.
-        .substring(index)
+        .substring(index +(len ?? 0))
         // Keep first paragraph.
         .split('\n')
         .first
@@ -454,7 +457,7 @@ class AutoFormatMultipleLinksRule extends InsertRule {
     // Build base delta.
     // The base delta is a simple insertion delta.
     final baseDelta = Delta()
-      ..retain(index)
+      ..retain(index + (len ?? 0))
       ..insert(data);
 
     // Get unchanged text length.

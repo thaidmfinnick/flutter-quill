@@ -234,6 +234,11 @@ class EditorTextSelectionOverlay {
         position == _TextSelectionHandlePosition.end) {
       return Container();
     }
+
+    if (_selection.baseOffset == _selection.extentOffset) {
+      return Container();
+    }
+
     return Visibility(
         visible: handlesVisible,
         child: _TextSelectionHandleOverlay(

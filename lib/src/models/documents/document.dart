@@ -291,7 +291,7 @@ class Document {
   /// of this document.
   ///
   /// In case the [change] is invalid, behavior of this method is unspecified.
-  void compose(Delta delta, ChangeSource changeSource) {
+  void compose(Delta delta, ChangeSource changeSource, {bool triggerHistory = false, Function(int)? func}) {
     assert(!documentChangeObserver.isClosed);
     delta.trim();
     assert(delta.isNotEmpty);
@@ -326,17 +326,41 @@ class Document {
     if (_delta != _root.toDelta()) {
       throw StateError('Compose failed');
     }
-    final change = DocChange(originalDelta, delta, changeSource);
+    final pos = compareDeltasAndGetSelection(originalDelta, delta);
+    final change = DocChange(originalDelta, delta, changeSource, pos);
     documentChangeObserver.add(change);
     history.handleDocChange(change);
+
+    if(triggerHistory && func != null) {
+      func(pos);
+    }
   }
 
-  HistoryChanged undo() {
-    return history.undo(this);
+  int compareDeltasAndGetSelection(Delta oldDelta, Delta newDelta) {
+    final oldIterator = DeltaIterator(oldDelta);
+    final newIterator = DeltaIterator(newDelta);
+
+    // Vị trí hiện tại trong văn bản
+    var position = 0;
+
+    while (oldIterator.hasNext || newIterator.hasNext) {
+      final oldOp = oldIterator.next();
+      final newOp = newIterator.next();
+
+      if (oldOp.value != newOp.value || oldOp.key != newOp.key) {
+        return position + (newOp.length ?? 0);
+      }
+      position += newOp.length ?? 0;
+    }
+    return position;
   }
 
-  HistoryChanged redo() {
-    return history.redo(this);
+  HistoryChanged undo(Function(int) func) {
+    return history.undo(this, func);
+  }
+
+  HistoryChanged redo(Function(int) func) {
+    return history.redo(this, func);
   }
 
   bool get hasUndo => history.hasUndo;
